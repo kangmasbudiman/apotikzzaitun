@@ -10,7 +10,8 @@ class UpdateStuffRequest extends FormRequest
     public function prepareForValidation()
     {
         $this->merge([
-            'price' => intval(str_replace(',', '', $this->price))
+            'hargaPokok' => intval(str_replace([',', '.'], '', $this->hargaPokok)),
+            'hargaJual' => intval(str_replace([',', '.'], '', $this->hargaJual))
         ]);
     }
 
@@ -21,7 +22,7 @@ class UpdateStuffRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('isAdminGudang');
     }
 
     /**
@@ -32,11 +33,17 @@ class UpdateStuffRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required',
-            'code' => 'required|unique:stuffs,code,'.$this->id,
-            'name' => 'required|string|unique:stuffs,name,'.$this->id,
-            'price' => 'required|numeric|digits_between:0,9',
-            'category_id' => 'required|exists:categories,id'
+            'idKategori' => 'required|exists:kategori,idKategori',
+            'idRak' => 'required|exists:rak,idRak',
+            'barcode' => 'required|string|unique:buku,barcode,'.$this->stuff.',idBuku',
+            'noisbn' => 'nullable|unique:buku,noisbn,'.$this->stuff.',idBuku',
+            'obat' => 'required|string',
+            'penulis' => 'nullable|string',
+            'suplier' => 'required|string',
+            'tahun' => 'required|date_format:Y',
+            'hargaPokok' => 'required|numeric|min:1|digits_between:0,9|max:'.$this->hargaJual,
+            'hargaJual' => 'required|numeric|digits_between:0,9',
+           // 'disc' => 'required|numeric|max:100'
         ];
     }
 }

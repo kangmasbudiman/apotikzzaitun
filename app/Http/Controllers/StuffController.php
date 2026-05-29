@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\StuffRepository;
 use App\Services\StuffService;
 use App\Http\Requests\Stuff\CreateStuffRequest;
 use App\Http\Requests\Stuff\UpdateStuffRequest;
+use App\Http\Requests\Stuff\ImportStuffRequest;
+use App\Exports\StuffExport;
+use App\Imports\StuffImport;
 
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+
+use PDF;
+use DNS1D;
 
 class StuffController extends Controller
 {
@@ -26,9 +33,12 @@ class StuffController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(): View
+    public function index(StuffRepository $stuffRepo): View
     {
-        return view('stuff.index');
+        $penerbit = $stuffRepo->getPenerbit();
+        $tahun = $stuffRepo->getTahun();
+
+        return view('stuff.index', compact('penerbit', 'tahun'));
     }
 
     /**
@@ -38,6 +48,8 @@ class StuffController extends Controller
      */
     public function create(): View
     {
+        $this->authorize('isAdminGudang');
+
         return view('stuff.create');
     }
 
@@ -49,9 +61,11 @@ class StuffController extends Controller
      */
     public function store(CreateStuffRequest $request): RedirectResponse
     {
+       // dd($request->all());
         $this->stuff->storeData($request->all());
 
-        return redirect('stuff')->with('success', 'Sukses Menambahkan Data');
+
+        return redirect('stuff')->with('success', 'Sukses Menambahkan Data Obat');
     }
 
     /**
@@ -60,7 +74,7 @@ class StuffController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(int $id): View
+    public function show($id): View
     {
         $stuff = $this->stuff->getOne($id);
 
@@ -74,11 +88,12 @@ class StuffController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateStuffRequest $request, int $id): JsonResponse
+    public function update(UpdateStuffRequest $request, $id): JsonResponse
     {
+       // dd($request->all());
         $this->stuff->updateData($id, $request->all());
 
-        return response()->json(['success' => 'Sukses Mengedit Data']);
+        return response()->json(['success' => 'Sukses Mengedit Data Obat']);
     }
 
     /**
@@ -87,28 +102,91 @@ class StuffController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy($id): JsonResponse
     {
+        $this->authorize('isAdminGudang');
         $this->stuff->deleteData($id);
 
-        return response()->json(['success' => 'Sukses Menghapus Data']);
+        return response()->json(['success' => 'Sukses Menghapus Data Obat']);
+    }
+
+    public function destroyBatch(StuffRepository $stuffRepo, Request $request): JsonResponse
+    {
+        $request->validate(['stuffs' => 'required|array']);
+
+        $stuffRepo->deleteBatch($request->stuffs);
+
+        return response()->json(['success' => 'Sukses Menghapus Data Buku']);
     }
 
     // Get Datatables
-    public function datatables(): Object
+    public function datatables(Request $request): Object
     {
-        return $this->stuff->getDatatables();
+        return $this->stuff->getDatatables($request->penerbit, $request->tahun);
     }
 
     // Select Data
     public function select(Request $request): Object
     {
-        return $this->stuff->selectData($request->name);
+        return $this->stuff->selectData($request->barcode);
     }
 
-    // Select Data By Code
-    public function selectCode(Request $request): Object
+    public function printall(StuffRepository $stuffRepo, Request $request)
     {
-        return $this->stuff->selectByCode($request->code);
+        $request->validate(['suplier' => 'nullable|string', 'tahun' => 'nullable|date_format:Y']);
+
+        $stuffs = $stuffRepo->filter($request->penerbit, $request->tahun);
+
+        $pdf = PDF::loadView('stuff.printall', compact('stuffs'));
+        $pdf->setPaper('a4');
+
+        return $pdf->stream();      
+    }
+
+    public function barcode($stuff): View
+    {
+        $stuff = $this->stuff->getOne($stuff);
+
+        $img = DNS1D::getBarcodePNG(substr($stuff->barcode, 0, 13), 'EAN13', 2, 60);
+        
+        return view('stuff.barcode', compact('stuff', 'img'));
+    }
+
+    public function printBarcode($stuff)
+    {
+        $stuff = $this->stuff->getOne($stuff);
+
+        $pdf = PDF::loadView('stuff.printbarcode', compact('stuff'));
+        $pdf->setPaper('a6');
+        
+        return $pdf->stream();
+    }
+
+    public function printAllBarcode(StuffRepository $stuffRepo, Request $request)
+    {
+        $request->validate(['show' => 'nullable|integer']);
+
+        $barcodes = $stuffRepo->getTake($request->show ?? 10);
+        $pdf = PDF::loadView('stuff.allbarcode', compact('barcodes'));
+        $pdf->setPaper('a4');
+        
+        return $pdf->stream();
+    }
+
+    public function export(StuffExport $export)
+    {
+        return $export->download('buku.xlsx');
+    }
+
+    public function import(StuffImport $import, ImportStuffRequest $request)
+    {
+        $import->import($request->file);
+
+        $failures = count($import->failures());
+        $errors = count($import->errors());
+
+        $res = $import->success.' import berhasil, '.$failures.' error '.$errors.' gagal';
+
+        return response()->json(['success' => $res]);
     }
 }

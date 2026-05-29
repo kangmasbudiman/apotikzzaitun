@@ -24,11 +24,7 @@ class UpdatePasswordRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required|exists:users',
-            'name' => 'required|string|unique:users,name,'.$this->id,
-            'email' => 'required|email|unique:users,email,'.$this->id,
-            'role' => 'required|in:admin,kasir',
-            'file' => 'image'
+            'password' => 'required|string|min:5|confirmed'
         ];
     }
 }

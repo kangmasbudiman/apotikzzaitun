@@ -9,5 +9,10 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    public $timestamps = false;
+
+    protected $primaryKey = 'idKategori';
+
+    protected $table = 'kategori';
+    protected $fillable = ['nama_kategori'];
 }

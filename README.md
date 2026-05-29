@@ -12,3 +12,4 @@ Aplikasi kasir sederhana dibuat dengan Laravel 8, Bootstrap, dan Sufee Admin.
 * php artisan migrate --seed
 * php artisan serve
 * Enjoy
+# posapotikdear

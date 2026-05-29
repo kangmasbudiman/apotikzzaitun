@@ -1,22 +1,26 @@
-.select2-container{
-    width: 100% !important;
+.form-group.is-invalid .invalid-feedback {
+    display: block;
 }
 
-.select2-container--default .select2-selection--single{
-    background-color: #fff !important;
-	border: 1px solid #ced4da !important;
-	border-radius: .25rem !important;
-    padding: .375rem .75rem !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    height: calc(2.25rem + 2px) !important;
+.form-group.is-invalid .custom-file-label {
+    border-color: #dc3545;
 }
 
-.select2-container .select2-selection--single .select2-selection__rendered{
-	padding: 0 !important;
+.form-group.is-invalid .select2-selection {
+    border-color: #dc3545;
 }
 
-.select2-container--default .select2-selection--single .select2-selection__arrow b{
-	top: 65% !important;
+.modal {
+    overflow-y: auto;
+}
+
+@media(min-width:580px) {
+    .modal-md {
+        max-width: 580px;
+    }
+}
+@media(min-width:1200px) {
+    .modal-xl {
+        max-width: 1200px;
+    }
 }

@@ -1,4 +1,6 @@
 jQuery(function ($) {
+
+	bsCustomFileInput.init()
 	
 	const table = $('table').DataTable({
 		serverSide: true,
@@ -6,26 +8,44 @@ jQuery(function ($) {
 		ajax: {
 			url: ajaxUrl,
 			type: 'post',
-			data: {
-				_token: csrf
+			data: d => {
+				d._token = csrf
+				d.dari = $('[name=dari]').val()
+				d.sampai = $('[name=sampai]').val()
+				d.distributor = $('[name=distributor]').val()
 			}
+			
 		},
+
 		columns: [
-			{ data: 'DT_RowIndex' },
-			{ data: 'stuff.name' },
-			{ data: 'type' },
-			{ data: 'total' },
+			{ data: 'idPembelian' },
 			{ data: 'date' },
+			{ data: 'jatuh_tempo' },
+			{ data: 'namaDist' },
+			{ data: 'faktur' },
+			{ data: 'total' },
+			
+			
 			{
 				data: 'action',
 				orderable: false,
 				searchable: false
 			}
 		],
-		lengthMenu: [[5,10,50,-1],[5,10,50,'All']]
+		order: [[ 0, 'desc' ]]
+		
 	})
 
 	const reload = () => table.ajax.reload()
+
+	const error = (errors, form) => {
+		$.each(errors, (name, msg) => {
+			const input = $(form).find(`[name=${name}]`)
+
+			input.addClass('is-invalid')
+			input.next('.invalid-feedback').html(msg)
+		})
+	}
 
 	const success = msg => {
 		const alert = $('#alert')
@@ -40,15 +60,6 @@ jQuery(function ($) {
 		reload()
 	}
 
-	const error = (errors, form) => {
-		$.each(errors, (name, msg) => {
-			const input = $(form).find(`[name=${name}]`)
-
-			input.addClass('is-invalid')
-			input.next('.invalid-feedback').html(msg)
-		})
-	}
-
 	const reset = form => {
 		const inputs = $(form).find('.is-invalid')
 
@@ -59,61 +70,47 @@ jQuery(function ($) {
 		form.reset()
 	}
 
-	const remove = id => {
-		if (confirm('Hapus data ini?')) {
-			const url = deleteUrl.replace(':id', id)
-
-			$.ajax({
-				url: url,
-				type: 'post',
-				data: {
-					_token: csrf,
-					_method: 'DELETE'
-				},
-				success: res => success(res.success)
-			})
-		}
-	}
-
-	$('tbody').on('click', 'button', function () {
-		const id = table.row($(this).parents('tr')).data().id
-
-		remove(id)
-	})
-
-	$('[name=stuff_id]').select2({
-		placeholder: 'Barang',
-		ajax: {
-			url: stuffUrl,
-			type: 'post',
-			data: params => ({
-				name: params.term,
-				_token: csrf
-			}),
-			processResults: res => ({
-				results: res
-			}),
-			cache: true
-		}
-	})
-
 	$('form').submit(function (e) {
 		e.preventDefault()
 
-		$.ajax({
-			url: this.action,
-			method: this.method,
-			data: $(this).serialize(),
+		data = new FormData(this)
+
+        $.ajax({
+            url: this.action,
+            method: this.method,
+            data: data,
+            contentType: false,
+            processData: false,
 			success: res => {
 				success(res.success)
 				reset(this)
 			},
-			error: err => {
-				const errors = err.responseJSON.errors
+            error: err => {
+                const errors = err.responseJSON.errors
 
-				error(errors, this)
-			}
+                error(errors, this)
+            }
 		})
 	})
+
+	$('.filter').on('click', reload)
+	$('.print').on('click', () => {
+		let filter = `?dari=${$('[name=dari]').val()}&sampai=${$('[name=sampai]').val()}`
+
+		if ($('[name=distributor]').val()) {
+			filter += `&distributor=${$('[name=distributor]').val()}`
+		}
+
+		window.open(printUrl + filter, '_blank')
+	})
+
+    $('#import').on('show.bs.modal', function () {
+        reset($(this).find('form')[0])
+    })
+
+    $('[name=distributor]').select2({
+    	theme: 'bootstrap4',
+    	placeholder: 'Distributor'
+    })
 
 })

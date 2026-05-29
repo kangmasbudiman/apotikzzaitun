@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\SettingService;
 use App\Http\Requests\UpdateSettingRequest;
-use App\Services\SiteService;
 
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
 
-	public function update(UpdateSettingRequest $request, SiteService $site)
+	public function index()
 	{
-		$site->update($request->all());
+		return view('setting');
+	}
+
+	public function update(UpdateSettingRequest $request, SettingService $setting)
+	{
+		$setting->store($request->all(), $request->logo);
 
 		return back()->with('success', 'Sukses Mengedit Pengaturan');
 	}

@@ -6,6 +6,7 @@ use App\Models\Site;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\Paginator;
 
 use Cache;
 
@@ -28,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        if (Schema::hasTable('site')) {
+        Paginator::useBootstrap();
+
+        if (Schema::hasTable('pengaturan')) {
             Cache::forever('site', Site::first());
         }
     }

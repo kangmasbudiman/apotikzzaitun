@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Services\CategoryService;
 use App\Http\Requests\Category\CreateCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
+use App\Http\Requests\Category\ImportCategoryRequest;
+use App\Exports\CategoryExport;
+use App\Imports\CategoryImport;
 
 use Illuminate\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
@@ -30,6 +34,11 @@ class CategoryController extends Controller
         return view('category.index');
     }
 
+    public function create(): View
+    {
+        return view('category.create');
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -40,7 +49,7 @@ class CategoryController extends Controller
     {
         $this->category->storeData($request->all());
 
-        return response()->json(['success' => 'Sukses Menambahkan Data']);
+        return response()->json(['success' => 'Sukses Menambahkan Data Kategori']);
     }
 
     /**
@@ -50,11 +59,11 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateCategoryRequest $request, int $id): JsonResponse
+    public function update(UpdateCategoryRequest $request, $id): JsonResponse
     {
         $this->category->updateData($id, $request->all());
 
-        return response()->json(['success' => 'Sukses Mengedit Data']);
+        return response()->json(['success' => 'Sukses Mengedit Data Kategori']);
     }
 
     /**
@@ -63,11 +72,11 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy($id): JsonResponse
     {
         $this->category->deleteData($id);
 
-        return response()->json(['success' => 'Sukses Menghapus Data']);
+        return response()->json(['success' => 'Sukses Menghapus Data Kategori']);
     }
 
     // Get Datatables
@@ -80,5 +89,22 @@ class CategoryController extends Controller
     public function select(Request $request): Object
     {
         return $this->category->selectData($request->name);
+    }
+
+    public function export(CategoryExport $export)
+    {
+        return $export->download('kategori.xlsx');
+    }
+
+    public function import(CategoryImport $import, ImportCategoryRequest $request)
+    {
+        $import->import($request->file);
+
+        $failures = count($import->failures());
+        $errors = count($import->errors());
+
+        $res = $import->success.' import berhasil, '.$failures.' error '.$errors.' gagal';
+
+        return response()->json(['success' => $res]);
     }
 }

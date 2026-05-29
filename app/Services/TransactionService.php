@@ -2,46 +2,95 @@
 
 namespace App\Services;
 
+use App\Models\{PPN, Transaction};
 use App\Repositories\TransactionRepository;
-use App\Transaction;
 
 use Yajra\Datatables\Datatables;
-
-use Auth;
 
 class TransactionService extends Service {
 
 	protected $transaction;
 	protected $stuff;
 
-	public function __construct(TransactionRepository $transactionRepo, Transaction $transaction, StuffService $stuff)
+	public function __construct(TransactionRepository $transactionRepo, StuffService $stuff)
 	{
 		$this->repo = $transactionRepo;
-		$this->transaction = $transaction;
 		$this->stuff = $stuff;
 	}
 
-	public function storeData(array $data): Object
+	public function cancel($id): Void
 	{
-		$data = collect($data);
-		$data = $data->merge([
-			'invoice' => $this->getInvoice(),
-			'user_id' => Auth::id()
-		]);
+		$transaction = $this->getOne($id);
 
-		$transactions = $this->transaction->result();
-		
-		$transaction = $this->repo->store($data->all(), $transactions);
-		
-		$this->removeStock($transactions);
-		$this->transaction->clear();
+		foreach ($transaction->detail as $stuff) {
+			if ($stuff->idBuku) {
+				$this->stuff->addStock($stuff->idBuku, $stuff->jumlah);
+			}
+		}
 
+		$transaction->status = 0;
+		$transaction->ppn()->delete();
+		$transaction->save();
+	}
+
+	public function store(array $data, array $books): Object
+	{		
+		
+		$transaction = $this->repo->create($data);
+		
+		$transaction->stuffs()->attach($books);
+
+	//	$this->createPPN($transaction);
+		
 		return $transaction;
 	}
 
-	public function deleteData(int $id): Object
+	public function createPPN(Transaction $transaction)
 	{
-		return $this->repo->delete($id);
+		$ppn = PPN::create([
+			'idUser' => auth()->id(),
+			'jenis' => 'PPN Dikeluarkan',
+			'nominal' => $transaction->ppn,
+			'keterangan' => substr($transaction->idPenjualan, 0, 5)
+		]);
+
+		$transaction->ppn()->save($ppn);
+	}
+
+	public function filter($dari = null, $sampai = null, $status = null, $user = null): Object
+	{
+		$admin = auth()->user()->can('isAdmin');
+
+		if (!is_null($status)) {
+			return $status ? $this->filterSuccess($dari, $sampai, $user) : $this->filterCancel($dari, $sampai, $user);
+		}
+
+		return $admin ? $this->repo->filter($dari, $sampai, $user) : $this->repo->filterByKasir($dari, $sampai, auth()->id());
+	}
+
+	public function filterSuccess($dari = null, $sampai = null, $user = null): Object
+	{
+		return $this->repo->filterSuccess($dari, $sampai, $user);
+	}
+
+	public function filterCancel($dari = null, $sampai = null, $user = null): Object
+	{
+		return $this->repo->filterCancel($dari, $sampai, $user);
+	}
+
+	public function deleteData($id): Object
+	{
+		$transaction = $this->getOne($id);
+
+		foreach ($transaction->detail as $stuff) {
+			if ($stuff->idBuku) {
+				$this->stuff->addStock($stuff->idBuku, $stuff->jumlah);
+			}
+		}
+
+		$transaction->delete();
+
+		return $transaction;
 	}
 
 	public function removeStock(array $transactions)
@@ -53,43 +102,42 @@ class TransactionService extends Service {
 		});
 	}
 
-	public function countToday(): Int
+	public function getDatatables($dari = null, $sampai = null, $status = null, $user = null): Object
 	{
-		return $this->repo->countToday();
-	}
-
-	public function getInvoice(): String
-	{
-		$id = $this->repo->getLastId();
-		$invoice = str_pad($id, 4, '0', STR_PAD_LEFT);
-		
-		return $invoice;
-	}
-
-	public function getByInvoice(string $invoice): Object
-	{
-		return $this->repo->getByInvoice($invoice);
-	}
-
-	public function getDatatables(): Object
-	{
-		$datatables = Datatables::of($this->repo->get())
+		$admin = auth()->user()->can('isAdmin');
+		$datatables = Datatables::of($this->filter($dari, $sampai, $status, $user))
 					->addIndexColumn()
-					->editColumn('money', function ($transaction)
+					->editColumn('total_bayar', function ($transaction)
 					{
-						return 'Rp '.number_format($transaction->money);
+						return 'Rp '.number_format($transaction->total_bayar);
 					})
-					->addColumn('date', function ($transaction)
+					->editColumn('total', function ($transaction)
 					{
-						return $transaction->date;
+						return 'Rp '.number_format($transaction->total);
 					})
-					->addColumn('action', function ($transaction)
+					->editColumn('tanggal', function ($transaction)
 					{
+						return date('d M Y H:i A', strtotime($transaction->tanggal));
+					})
+					->addColumn('kembalian', function ($transaction)
+					{
+						return 'Rp '.number_format($transaction->total_bayar - $transaction->total);
+					})
+					->addColumn('status_badge', function ($transaction) use ($admin)
+					{
+						return $transaction->status_badge;
+					})
+					->addColumn('action', function ($transaction) use ($admin)
+					{
+						$lewat = date('Y-m-d') > date('Y-m-d', strtotime($transaction->tanggal));
+						$disabled = $lewat || !$transaction->status ? 'disabled' : '';
+
 						return '
-							<a href="'.route('transaction.detail', $transaction->invoice).'" class="btn btn-sm btn-success"><i class="fa fa-eye"></i></a>
-							<button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+							<a href="'.route('transaction.detail', $transaction->idPenjualan).'" class="btn btn-sm btn-success">Detail<i class="fa fa-eye"></i></a>
+							<button class="btn btn-sm btn-danger" data-action="cancel" '.$disabled.'>Hapus<i class="fa fa-times"></i></button>
 						';
 					})
+					->rawColumns(['status_badge', 'barcode', 'action'])
 					->make();
 
 		return $datatables;

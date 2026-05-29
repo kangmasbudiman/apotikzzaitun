@@ -10,7 +10,9 @@ class CreateStuffRequest extends FormRequest
     public function prepareForValidation()
     {
         $this->merge([
-            'price' => intval(str_replace(',', '', $this->price))
+            'hargaPokok' => intval(str_replace([',', '.'], '', $this->hargaPokok)),
+            'hargaJual' => intval(str_replace([',', '.'], '', $this->hargaJual)),
+            'stock' => 0
         ]);
     }
 
@@ -21,7 +23,7 @@ class CreateStuffRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('isAdminGudang');
     }
 
     /**
@@ -32,10 +34,17 @@ class CreateStuffRequest extends FormRequest
     public function rules()
     {
         return [
-            'code' => 'required|unique:stuffs',
-            'name' => 'required|string|unique:stuffs',
-            'price' => 'required|numeric|digits_between:0,9',
-            'category_id' => 'required|exists:categories,id'
+            'idKategori' => 'required|exists:kategori',
+            'idRak' => 'required|exists:rak',
+            'barcode' => 'required|string|unique:buku',
+            'noisbn' => 'nullable|unique:buku',
+            'obat' => 'required|string',
+            'penulis' => 'nullable|string',
+            'suplier' => 'required|string',
+            'margin' => 'required|numeric|max:100',
+            'hargaPokok' => 'required|numeric|min:1|digits_between:0,9|max:'.$this->hargaJual,
+            'hargaJual' => 'required|numeric|min:1|digits_between:0,9',
+            'ppn' => 'required|numeric|max:100'
         ];
     }
 }

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Services\UserService;
+use App\Repositories\UserRepository;
 use App\Http\Requests\User\UpdatePasswordRequest;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -18,7 +20,6 @@ class UserController extends Controller
 
     public function __construct(UserService $user)
     {
-        $this->middleware('can:isAdmin');
         $this->user = $user;
     }
 
@@ -59,10 +60,10 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param   $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdatePasswordRequest $request, int $id): JsonResponse
+    public function update(UpdateUserRequest $request, $id): JsonResponse
     {
         $this->user->updateData($id, $request);
 
@@ -72,10 +73,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param   $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy($id): JsonResponse
     {
         $this->user->deleteData($id);
 
@@ -93,5 +94,11 @@ class UserController extends Controller
     public function datatables(): Object
     {
         return $this->user->getDatatables();
+    }
+
+    // Get Datatables
+    public function select(UserRepository $userRepo, Request $request): Object
+    {
+        return $userRepo->select($request->nama);
     }
 }

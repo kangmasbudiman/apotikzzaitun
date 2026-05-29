@@ -11,17 +11,17 @@ class Service {
 		return $this->repo->create($data);
 	}
 
-	public function updateData(int $id, array $data): Object
+	public function updateData($id, array $data): Object
 	{
 		return $this->repo->update($id, $data);
 	}
 
-	public function deleteData(int $id): Object
+	public function deleteData($id): Object
 	{
 		return $this->repo->delete($id);
 	}
 
-	public function getOne(int $id): Object
+	public function getOne($id): Object
 	{
 		return $this->repo->find($id);
 	}

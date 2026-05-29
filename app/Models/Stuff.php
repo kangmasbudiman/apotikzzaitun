@@ -5,21 +5,39 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use DNS1D;
-
 class Stuff extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['code', 'name', 'price', 'stock', 'category_id'];
+    protected $table = 'buku';
+    protected $primaryKey = 'idBuku';
 
-    public function getBarcodeImageAttribute()
+    public $incrementing = false;
+    public $timestamps = false;
+    
+    protected static function booted()
     {
-    	return '<img src="data:image/png;base64,' . DNS1D::getBarcodePNG($this->code, 'UPCA') . '" alt="barcode"   />';
+        static::creating(function ($stuff)
+        {
+            $lastId = Stuff::latest('idBuku')->first()->idBuku ?? 0;
+            $lastId = intval(substr($lastId, 2));
+
+            $stuff->idBuku = 'OB'.sprintf("%05d", $lastId+1);
+        });
     }
+
+    // protected $fillable = ['code', 'name', 'price', 'stock', 'category_id'];
+    protected $fillable = ['idKategori', 'barcode', 'noisbn', 'idRak', 'obat', 'penulis', 'suplier', 'tahun', 'stock', 'hargaPokok', 'hargaJual', 'disc','ppn','margin'];
+
+    protected $guarded = ['idBuku'];
 
     public function category()
     {
-    	return $this->belongsTo(Category::class);
+    	return $this->belongsTo(Category::class, 'idKategori', 'idKategori');
+    }
+
+    public function rack()
+    {
+        return $this->belongsTo(Rack::class, 'idRak', 'idRak');
     }
 }

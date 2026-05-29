@@ -6,26 +6,29 @@
 	<div class="card">
 		<div class="card-body">
 			<div class="row">
-				<div class="col-sm-9">
-					<h1 class="h3">{{ site('name') }}</h1>
-					<p>{{ site('address') }}</p>
+				<div class="col-sm-8">
+					<h1 class="h3">Apotik Dear</h1>
+					<p>{{ site('alamat_toko') }}</p>
 				</div>
-				<div class="col-sm-3">
+				<div class="col-sm-4">
 					<dl class="row mx-0">
-						<dt class="col-sm-5 px-0">Tanggal</dt>
-						<dd class="col-sm-7 row px-0 mx-0 text-right">
-							<span class="col-sm-2 px-0">:</span>
-							<span class="col-sm-10 px-0">{{ localDate($transaction->created_at) }}</span>
+						<dt class="col-3 px-0">Tanggal</dt>
+						<dd class="col-9 row px-0 mx-0 text-right">
+							@php
+								date_default_timezone_set('Asia/Jakarta');
+							@endphp
+							<span class="col-2 px-0">:</span>
+							<span class="col-10 px-0">{{ date('d/m/y H:i A', strtotime($transaction->tanggal)) }}</span>
 						</dd>
-						<dt class="col-sm-5 px-0">Nota</dt>
-						<dd class="col-sm-7 row px-0 mx-0 text-right">
-							<span class="col-sm-2 px-0">:</span>
-							<span class="col-sm-10 px-0">#{{ $transaction->invoice }}</span>
+						<dt class="col-3 px-0">No Faktur</dt>
+						<dd class="col-9 row px-0 mx-0 text-right">
+							<span class="col-2 px-0">:</span>
+							<span class="col-10 px-0">{{ $transaction->idPenjualan }}</span>
 						</dd>
-						<dt class="col-sm-5 px-0">Kasir</dt>
-						<dd class="col-sm-7 row px-0 mx-0 text-right">
-							<span class="col-sm-2 px-0">:</span>
-							<span class="col-sm-10 px-0">{{ $transaction->user->name }}</span>
+						<dt class="col-3 px-0">Kasir</dt>
+						<dd class="col-9 row px-0 mx-0 text-right">
+							<span class="col-2 px-0">:</span>
+							<span class="col-10 px-0">{{ $transaction->namaUser }}</span>
 						</dd>
 					</dl>
 				</div>
@@ -35,49 +38,54 @@
 					<thead>
 						<tr>
 							<th>No</th>
-							<th>Barang</th>
+							<th>Obat</th>
 							<th>Harga</th>
 							<th>Jumlah</th>
+							<th>Diskon</th>
 							<th>Total</th>
 						</tr>
 					</thead>
 					<tbody>
 						@php
-							$total = 0;
+							$subtotal = 0;
 						@endphp
-						@foreach($transaction->stuffs as $stuff)
+						@foreach($transaction->detail as $stuff)
+							@php
+								$total = $stuff->jumlah * $stuff->hargaJual - $stuff->disc;
+								$subtotal += $total;
+							@endphp
 							<tr>
 								<td>{{ $loop->iteration }}</td>
-								<td>{{ $stuff->name }}</td>
-								<td>Rp {{ number_format($stuff->price) }}</td>
-								<td>{{ $stuff->pivot->total }}</td>
-								<td>Rp {{ number_format($stuff->price * $stuff->pivot->total) }}</td>
-								@php
-									$total += $stuff->price * $stuff->pivot->total;
-								@endphp
+								<td>{{ $stuff->obat }}</td>
+								<td>Rp {{ number_format($stuff->hargaJual) }}</td>
+								<td>{{ $stuff->jumlah }}</td>
+								<td>Rp {{ number_format($stuff->disc) }}</td>
+								<td>Rp {{ number_format($total) }}</td>
 							</tr>
 						@endforeach
 					</tbody>
 					<tfoot>
 						<tr>
-							<td colspan="4" align="right"><strong>Subtotal</strong></td>
-							<td>Rp {{ number_format($total) }}</td>
+							<td colspan="5" align="right"><strong>Total</strong></td>
+							<td>Rp {{ number_format($subtotal) }}</td>
 						</tr>
 						<tr>
-							<td colspan="4" align="right"><strong>Uang</strong></td>
-							<td>Rp {{ number_format($transaction->money) }}</td>
+							<td colspan="5" align="right"><strong>PPN</strong></td>
+							<td>Rp {{ number_format($transaction->ppn) }}</td>
 						</tr>
 						<tr>
-							<td colspan="4" align="right"><strong>Kembali</strong></td>
-							<td>Rp {{ number_format($transaction->money - $total) }}</td>
+							<td colspan="5" align="right"><strong>Subtotal</strong></td>
+							<td>Rp {{ number_format($transaction->total) }}</td>
 						</tr>
 					</tfoot>
 				</table>
 			</div>
 		</div>
 		<div class="card-footer">
-			<a href="{{ route('transaction.print', $transaction->invoice) }}" class="btn btn-primary">Print</a>
-			<a href="{{ route('report') }}" class="btn btn-secondary">Kembali</a>
+			@if ($transaction->status)
+				<a href="{{ route('transaction.print', $transaction->idPenjualan) }}" class="btn btn-primary">Print</a>
+			@endif
+			<a href="{{ route('transaction.index') }}" class="btn btn-secondary">Kembali</a>
 		</div>
 	</div>
 @endsection

@@ -2,12 +2,17 @@
 
 namespace App\Http\Requests\Stock;
 
-use App\Services\StuffService;
-
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateStockRequest extends FormRequest
 {
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'tanggal' => date('Y-m-d')
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -23,21 +28,13 @@ class CreateStockRequest extends FormRequest
      *
      * @return array
      */
-    public function rules(StuffService $stuff)
+    public function rules()
     {
         $rules = [
-            'stuff_id' => 'required|exists:stuffs,id',
-            'type' => 'required|in:masuk,keluar',
-            'total' => 'required|integer'
+            'idBuku' => 'required|exists:buku,idBuku',
+            'idDist' => 'required|exists:distributor,idDist',
+            'jumlah' => 'required|integer'
         ];
-
-        if ($this->type === 'keluar') {
-            $stock = $stuff->getStock($this->stuff_id);
-
-            $rules = array_merge($rules, [
-                'total' => 'required|integer|max:'.$stock
-            ]);
-        }
 
         return $rules;
     }

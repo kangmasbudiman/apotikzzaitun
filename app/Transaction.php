@@ -3,63 +3,111 @@
 namespace App;
 
 use Illuminate\Support\Facades\Cookie;
+use App\Services\{StuffService, TransactionService, DetailTransactionService};
 
-class Transaction {
+trait Transaction
+{
 
-	public $transactions;
+	public $transactions = [];
+	public $subtotal;
 
-	public function __construct()
-	{
-		$transactions = Cookie::get('transactions');
-
-		$this->transactions = $transactions ? json_decode($transactions) : [];
-	}
-
-	public function create(array $data)
+	public function create(array $data): Void
 	{
 		$transactions = collect($this->transactions);
 		$transaction = $transactions->firstWhere('id', $data['id']);
 
 		if ($transaction) {
-			$transaction = $this->update($transaction, $data);
+			if ($data['total'] > ($data['stock'] - $transaction['total'])) {
+				$this->emit('error-limit');
+			} else {
+				$transactions = $this->update($transaction, $data);
+				
+				$this->store(collect($transactions));
+			}
 		} else {
 			$transactions->push($data);
+	
+			$this->store($transactions);
 		}
-
-		$this->store($transactions);
-
 	}
 
-	public function update(object $transaction, array $data)
+	public function update(array $transaction, array $data)
 	{
-		$total = $transaction->total + $data['total'];
+		$total = $transaction['total'] + $data['total'];
 		
 		if ($total > $data['stock']) {
-			session()->flash('error', 'Jumlah Terlalu banyak');
-			return false;
+			$this->emit('error-limit');
 		} else {
-			$transaction->total = $total;
-		}
+			$transactions = $this->transactions;
+			$index = $this->searchIndex($transaction['id']);
+			
+			$transactions[$index]['total'] = $total;
 
-		return $transaction;
+			return $transactions;
+		}
 	}
 
-	public function delete(int $id)
+	public function updateStock($id, int $total)
+	{
+		$transactions = $this->transactions;		
+		$index = $this->searchIndex($id);
+
+		$transactions[$index]['total'] = $total;
+
+		$this->store(collect($transactions));
+	}
+
+	private function searchIndex($id): Int
+	{
+		return collect($this->transactions)->search(function ($item) use ($id)
+		{
+			return $item['id'] === $id;
+		});
+	}
+
+	public function delete($id)
 	{
 		$transactions = collect($this->transactions);
-		$transactions->splice($id, 1);
+		$transactions->splice($this->searchIndex($id), 1);
 
 		$this->store($transactions);
+	}
+
+	public function increment($id)
+	{
+		$stuffService = app(StuffService::class);
+		$transactions = $this->transactions;
+
+		$stuff = $stuffService->getOne($id);
+		$index = $this->searchIndex($id);
+
+		if ($transactions[$index]['total'] >= $stuff->stock) {
+			$this->error('Stok melebihi batas');
+		} else {
+			$transactions[$index]['total']++;
+		}
+
+		$this->store(collect($transactions));
+	}
+
+	public function decrement($id)
+	{
+		$transactions = $this->transactions;
+
+		$index = $this->searchIndex($id);
+
+		if ($transactions[$index]['total'] <= 1) {
+			$this->error('Stok terlalu sedikit');
+		} else {
+			$transactions[$index]['total']--;
+		}
+
+		$this->store(collect($transactions));
 	}
 
 	public function clear()
 	{
-		Cookie::queue(Cookie::forget('transactions'));
-	}
-
-	public function store(object $transactions)
-	{
-		Cookie::queue(Cookie::make('transactions', json_encode($transactions), 2800));
+		$this->transactions = [];
 	}
 
 	public function total(): Int
@@ -68,7 +116,10 @@ class Transaction {
 
 		$total = $transactions->sum(function ($transaction)
 		{
-			return $transaction->total * $transaction->price;
+			$disc = $transaction['total'] * ($transaction['hargaJual'] * $transaction['disc'] / 100);
+			$total = $transaction['total'] * $transaction['hargaJual'] - $disc;
+
+			return $total;
 		});
 
 		return $total;
@@ -76,22 +127,44 @@ class Transaction {
 
 	public function result(): Array
 	{
-		$transactions = collect($this->transactions);
-		
-		$id = $transactions->pluck('id');
-		$data = $transactions->map(function ($transaction)
-		{
-			return ['total' => $transaction->total];
-		});
+		$data = [];
 
-		$data = $id->combine($data);
+		foreach ($this->transactions as $transaction) {
+			$disc = $transaction['total'] * ($transaction['hargaJual'] * $transaction['disc'] / 100);
+			$ppn = site('ppn') / 100 * ($transaction['total'] * $transaction['hargaJual'] - $disc);
+			
+			$data[$transaction['id']] = [
+				'obat' => $transaction['obat'],
+				'hargaPokok' => $transaction['hargaPokok'],
+				'hargaJual' => $transaction['hargaJual'],
+				'jumlah' => $transaction['total'],
+				'ppn' => $ppn,
+				'disc' => $disc,
+			];
+		}
 
-		return $data->all();
+		return $data;
 	}
 
-	public function get(): Array
+	public function store(object $transactions)
 	{
-		return $this->transactions;
+		$stuffService = app(StuffService::class);
+
+		$transactions = $transactions->map(function ($transaction) use ($stuffService)
+		{
+			if ($stuffService->search($transaction['id'])) {
+				$transaction['stuff'] = $stuffService->search($transaction['id']);
+
+				return $transaction;
+			}
+		})->reject(function ($transaction)
+		{
+			return is_null($transaction);
+		})->values();
+
+		$this->transactions = $transactions->all();
+		$this->subtotal = $this->total();
+		$this->emit('transaction-added', $this->result(), $this->total());
 	}
 
 }

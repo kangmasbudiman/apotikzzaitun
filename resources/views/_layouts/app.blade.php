@@ -7,7 +7,7 @@
 
 </head>
 
-<body>
+<body class="open">
 
     <!-- Left Panel -->
 
@@ -23,7 +23,7 @@
 
         <!-- Header-->
         
-        @include('_partials.navbar')
+        <x-navbar />
 
         <!-- /header -->
         <!-- Header-->

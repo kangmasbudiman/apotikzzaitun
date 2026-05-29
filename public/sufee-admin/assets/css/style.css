@@ -1011,6 +1011,10 @@ aside.left-panel {
   -webkit-transition:width 0.3s ease;
   transition: width 0.3s ease; }
 
+  .btnlogin{
+    background-color:#184486;
+    color:#fff;
+  }
 .navbar {
   background: #272c33;
   border-radius: 0;
@@ -1813,9 +1817,9 @@ header .form-inline {
   margin: 8vh auto; }
 
 .login-form {
-  background: #ffffff;
-  padding: 30px 30px 20px;
-  border-radius: 2px; }
+  background: #1a3865;
+  padding: 90px 90px 90px;
+  border-radius: 10px; }
 
 .login-form h4 {
   color: #878787;
@@ -1832,11 +1836,12 @@ header .form-inline {
   width: 100%;
   text-transform: uppercase;
   font-size: 14px;
+  border-radius:5px;
   padding: 15px;
   border: 0; }
 
 .login-form label {
-  color: #878787;
+  color: #fff;
   text-transform: uppercase; }
 
 .login-form label a {

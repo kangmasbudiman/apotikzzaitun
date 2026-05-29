@@ -4,23 +4,40 @@
 
         <div class="col-sm-7">
             <a id="menuToggle" class="menutoggle pull-left"><i class="fa fa fa-tasks"></i></a>
+
+            <div class="header-left">
+                <div class="dropdown for-notification">
+                    <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-bell"></i>
+                        <span class="count bg-danger">{{ $limit }}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-lg border">
+                        <a href="" class="dropdown-item media bg-danger text-white">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            {{ $limit }} produk kehabisan stok
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+            
         </div>
 
         <div class="col-sm-5">
             <div class="user-area dropdown float-right">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img class="user-avatar rounded-circle" src="{{ image(Auth::user()->photo) }}" style="width: 30px; height: 30px; object-fit: cover;" alt="User Avatar">
+                    <i class="fa fa-user mt-2"></i>
                 </a>
 
                 <div class="user-menu dropdown-menu">
-                    <span>{{ Auth::user()->name }}</span>
+                    <span>{{ Auth::user()->nama }}</span>
 
                     <div class="dropdown-divider"></div>
 
                     <a class="nav-link" href="{{ route('change_password') }}"><i class="fa fa-key"></i> Ganti Password</a>
-
+                    @can('isAdmin')
                     <a class="nav-link" href="{{ route('setting.index') }}"><i class="fa fa-cog"></i> Settings</a>
-
+                    @endcan
                     <a class="nav-link" href="{{ route('logout') }}"><i class="fa fa-power-off"></i> Logout</a>
                 </div>
             </div>

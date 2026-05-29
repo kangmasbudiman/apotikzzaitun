@@ -6,6 +6,14 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CreateUserRequest extends FormRequest
 {
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'status' => 1,
+            'password' => $this->username,
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -24,11 +32,12 @@ class CreateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|unique:users',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,kasir',
-            'file' => 'required|image'
+            'nama' => 'required|string|unique:user',
+            'username' => 'required|string|unique:user',
+            'alamat' => 'required|string',
+            'telepon' => 'required|numeric',
+            'password' => 'required|string',
+            'hakAkses' => 'required|in:1,2,3',
         ];
     }
 }

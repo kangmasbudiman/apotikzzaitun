@@ -16,16 +16,12 @@
 
 </head>
 
-<body class="bg-dark">
+<body class="bg-white">
 
     <div class="sufee-login d-flex align-content-center flex-wrap">
         <div class="container">
             <div class="login-content">
-                <div class="login-logo">
-                    <a href="{{ route('login') }}">
-                        <h1 class="text-white font-weight-bold">Login</h1>
-                    </a>
-                </div>
+                
                 <div class="login-form">
                     @if (session('error'))
                         <div class="alert alert-danger alert-dismissible">
@@ -36,10 +32,17 @@
                     <form action="{{ route('login') }}" method="post">
                         @csrf
                         <div class="form-group">
-                            <label>Email address</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" placeholder="Email" value="{{ old('email') }}" autofocus>
+                        <div class="login-logo">
+                    <a href="{{ route('login') }}">
+                        <h1 class="text-white font-weight-bold">{{ Site('nama_toko') }}</h1>
+                       
+                    </a>
+                </div>
+                
+                            <label>Username</label>
+                            <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" placeholder="Username" value="{{ old('username') }}" autofocus>
 
-                            @error('email')
+                            @error('username')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
                         </div>
@@ -56,7 +59,7 @@
                                 <input type="checkbox" name="remember"> Remember Me
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-success btn-flat m-b-30 m-t-25 ">Sign in</button>
+                        <button type="submit" class="btn btnlogin btn-flat m-b-30 m-t-25 ">Sign in</button>
                     </form>
                 </div>
             </div>

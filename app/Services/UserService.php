@@ -19,27 +19,15 @@ class UserService {
 
 	public function storeData(object $data): Object
 	{
-		$photo = $this->uploadPhoto($data->file);
-		$data->merge([
-			'photo' => $photo
-		]);
-
 		return $this->model->create($data->all());
 	}
 
-	public function updateData(int $id, object $data): Object
+	public function updateData($id, object $data): Object
 	{
-		if ($data->hasFile('file')) {
-			$photo = $this->uploadPhoto($data->file);
-			$data->merge([
-				'photo' => $photo
-			]);
-		}
-
 		return $this->model->update($id, $data->all());
 	}
 
-	public function deleteData(int $id): Object
+	public function deleteData($id): Object
 	{
 		return $this->model->delete($id);
 	}
@@ -72,10 +60,6 @@ class UserService {
 	{
 		$data = Datatables::of($this->model->get())
 							->addIndexColumn()
-							->addColumn('photoSrc', function ($user)
-							{
-								return $user->photoSrc;
-							})
 							->addColumn('action', '
 								<button class="btn btn-sm btn-success" data-action="edit"><i class="fa fa-edit"></i></button>
 								<button class="btn btn-sm btn-danger" data-action="remove"><i class="fa fa-trash"></i></button>

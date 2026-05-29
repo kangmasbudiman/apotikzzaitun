@@ -24,7 +24,7 @@ class CreateCategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|unique:categories'
+            'nama_kategori' => 'required|string|unique:kategori,nama_kategori'
         ];
     }
 }

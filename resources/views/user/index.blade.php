@@ -23,10 +23,11 @@
 					<thead>
 						<tr>
 							<th>No</th>
+							<th>Username</th>
 							<th>Nama</th>
-							<th>Email</th>
+							<th>Alamat</th>
+							<th>Telepon</th>
 							<th>Role</th>
-							<th>Photo</th>
 							<th>Action</th>
 						</tr>
 					</thead>
@@ -49,34 +50,37 @@
 			<input type="hidden" name="id">
 			<div class="form-group">
 				<label>Nama</label>
-				<input type="text" class="form-control" name="name" placeholder="Nama" autofocus>
+				<input type="text" class="form-control @error('nama') is-invalid @enderror" name="nama" placeholder="Nama" value="{{ old('nama') }}" autofocus>
 
 				<span class="invalid-feedback"></span>
 			</div>
 			<div class="form-group">
-				<label>Email</label>
-				<input type="email" class="form-control" name="email" placeholder="Email">
+				<label>Username</label>
+				<input type="text" class="form-control @error('username') is-invalid @enderror" name="username" placeholder="Username" value="{{ old('username') }}">
 
 				<span class="invalid-feedback"></span>
 			</div>
 			<div class="form-group">
-				<label>Posisi</label>
-				<select class="form-control custom-select" name="role">
-					<option value="admin">Admin</option>
-					<option value="kasir">Kasir</option>
+				<label>Hak Akses</label>
+				<select class="form-control custom-select @error('hakAkses') is-invalid @enderror" name="hakAkses">
+					<option value="1">Admin</option>
+					<option value="2">Kasir</option>
+					<option value="3">Gudang</option>
 				</select>
 
 				<span class="invalid-feedback"></span>
 			</div>
 			<div class="form-group">
-				<label>Foto</label>
-				<div class="custom-file">
-					<label class="custom-file-label">Upload</label>
-					<input type="file" class="form-control custom-file-input" name="file">
-					
-					<span class="invalid-feedback"></span>
-				</div>
+				<label>Telepon</label>
+				<input type="number" class="form-control @error('telepon') is-invalid @enderror" name="telepon" placeholder="Telepon" value="{{ old('telepon') }}" autofocus>
 
+				<span class="invalid-feedback"></span>
+			</div>
+			<div class="form-group">
+				<label>Alamat</label>
+				<textarea class="form-control @error('alamat') is-invalid @enderror" name="alamat" placeholder="Alamat" value="{{ old('alamat') }}"></textarea>
+
+				<span class="invalid-feedback"></span>
 			</div>
 		</div>
 		<div class="modal-footer">
@@ -108,15 +112,11 @@
 	
 	<script src="{{ asset('sufee-admin/vendors/datatables.net/js/jquery.dataTables.min.js') }}"></script>
 	<script src="{{ asset('sufee-admin/vendors/datatables.net-bs4/js/dataTables.bootstrap4.min.js') }}"></script>
-	<script src="{{ asset('sufee-admin/vendors/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
 	
 	<script>
-		bsCustomFileInput.init()
-
 		const ajaxUrl = '{{ route('user.datatables') }}'
 		const updateUrl = '{{ route('user.update', ':id') }}'
 		const deleteUrl = '{{ route('user.destroy', ':id') }}'
-		const categoryUrl = '{{ route('category.select') }}'
 		const csrf = '{{ csrf_token() }}'
 	</script>
 

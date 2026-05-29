@@ -6,6 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateUserRequest extends FormRequest
 {
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'status' => 1,
+            'password' => $this->username
+        ]);
+    }
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -13,7 +20,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +31,11 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'nama' => 'required|string',
+            'username' => 'required|string',
+            'alamat' => 'required|string',
+            'telepon' => 'required|numeric',
+            'hakAkses' => 'required|in:1,2,3',
         ];
     }
 }

@@ -16,7 +16,7 @@ class Repository {
 		return $this->model->create($data);
 	}
 
-	public function update(int $id, array $data): Object
+	public function update($id, array $data): Object
 	{
 		$model = $this->model->findOrFail($id);
 		$model->update($data);
@@ -24,7 +24,7 @@ class Repository {
 		return $model;
 	}
 
-	public function delete(int $id): Object
+	public function delete($id): Object
 	{
 		$this->model->destroy($id);
 
@@ -41,7 +41,7 @@ class Repository {
 		return $this->where($columns, $value)->get();
 	}
 
-	public function find(int $id): Object
+	public function find($id): Object
 	{
 		return $this->model->findOrFail($id);
 	}
@@ -53,7 +53,7 @@ class Repository {
 
 	public function get(): Object
 	{
-		return $this->model->latest()->get();
+		return $this->model->get();
 	}
 
 	public function count(): int

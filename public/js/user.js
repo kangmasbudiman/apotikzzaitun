@@ -12,10 +12,32 @@ jQuery(function ($) {
 		},
 		columns: [
 			{ data: 'DT_RowIndex' },
-			{ data: 'name' },
-			{ data: 'email' },
-			{ data: 'role' },
-			{ data: 'photoSrc' },
+			{ data: 'username' },
+			{ data: 'nama' },
+			{ data: 'alamat' },
+			{ data: 'telepon' },
+			{
+				data: 'hakAkses',
+				render: data => {
+					const badges = [
+						{
+							color: 'primary',
+							text: 'admin'
+						},
+						{
+							color: 'warning',
+							text: 'kasir'
+						},
+						{
+							color: 'danger',
+							text: 'gudang'
+						}
+					]
+					const badge = badges[data-1]
+
+					return `<span class="badge badge-${badge.color}">${badge.text}</span>`
+				}
+			},
 			{
 				data: 'action',
 				orderable: false,
@@ -58,25 +80,26 @@ jQuery(function ($) {
 		form.reset()
 	}
 
-	const edit = ({id, name, email, role, photo}) => {
+	const edit = ({idUser, nama, username, alamat, telepon, hakAkses}) => {
 		const modal = $('.modal')
 		const form = modal.find('form')[0]
-		const url = updateUrl.replace(':id', id)
+		const url = updateUrl.replace(':id', idUser)
 
 		reset(form)
 		form.action = url
 
-		modal.find('[name=id]').val(id)
-		modal.find('[name=name]').val(name)
-		modal.find('[name=email]').val(email)
-		modal.find('[name=role]').val(role)
-		modal.find('[name=file]').prev('.custom-file-label').html(photo)
+		modal.find('[name=id]').val(idUser)
+		modal.find('[name=nama]').val(nama)
+		modal.find('[name=username]').val(username)
+		modal.find('[name=telepon]').val(telepon)
+		modal.find('[name=alamat]').val(alamat)
+		modal.find('[name=hakAkses]').val(hakAkses)
 
 		modal.modal('show')
 	}
 
 	const remove = id => {
-		if (confirm('Hapus data ini?')) {
+		if (confirm('Hapus data pengguna ini?')) {
 			const url = deleteUrl.replace(':id', id)
 
 			$.ajax({
@@ -100,7 +123,7 @@ jQuery(function ($) {
 				edit(data)
 				break
 			case 'remove':
-				remove(data.id)
+				remove(data.idUser)
 				break
 		}
 	})

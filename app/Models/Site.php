@@ -9,7 +9,10 @@ class Site extends Model
 {
     use HasFactory;
 
-    protected $table = 'site';
+    public $timestamps = false;
+    protected $primaryKey = 'idPengaturan';
 
-    protected $fillable = ['name', 'address'];
+    protected $table = 'pengaturan';
+
+    protected $fillable = ['idUser', 'nama_toko', 'alamat_toko', 'telepon_toko', 'ppn', 'logo', 'pakaiLogo', 'min_stok'];
 }

@@ -12,17 +12,35 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'user'; 
+    protected $primaryKey = 'idUser';
+
+    public $incrementing = false;
+    public $timestamps = false;
+
+    protected static function booted()
+    {
+        static::creating(function ($user)
+        {
+            $lastId = User::latest('idUser')->first()->idUser ?? 0;
+            $lastId = intval(substr($lastId, -6));
+
+            $user->idUser = sprintf("%06d", $lastId+1);
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name',
-        'email',
+        'nama',
+        'username',
+        'alamat',
+        'telepon',
         'password',
-        'role',
-        'photo'
+        'hakAkses',
     ];
 
     /**
@@ -46,11 +64,6 @@ class User extends Authenticatable
 
     public function setPasswordAttribute($password)
     {
-        $this->attributes['password'] = Hash::make($password);
-    }
-
-    public function getPhotoSrcAttribute()
-    {
-        return "<img src='".image($this->photo)."'/>";
+        $this->attributes['password'] = md5($password);
     }
 }

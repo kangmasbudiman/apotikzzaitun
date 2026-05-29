@@ -27,7 +27,7 @@ class LoginController extends Controller
 
 	public function login(LoginRequest $request): RedirectResponse
 	{
-		$credentials = $request->only('email', 'password');
+		$credentials = $request->only('username', 'password');
 		$remember = $request->filled('remember');
 
 		if ($this->auth->login($credentials, $remember)) {

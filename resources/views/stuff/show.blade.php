@@ -12,20 +12,30 @@
 				</div>
 				<div class="card-body">
 					<dl class="row">
-						<dt class="col-sm-6">Barcode</dt>
-						<dd class="col-sm-6">{!! $stuff->barcodeImage !!}</dd>
-						<dt class="col-sm-6">Kode</dt>
-						<dd class="col-sm-6">{{ $stuff->code }}</dd>
-						<dt class="col-sm-6">Nama</dt>
-						<dd class="col-sm-6">{{ $stuff->name }}</dd>
-						<dt class="col-sm-6">Kategori</dt>
-						<dd class="col-sm-6">{{ $stuff->category->name }}</dd>
-						<dt class="col-sm-6">Harga</dt>
-						<dd class="col-sm-6">{{ $stuff->price }}</dd>
-						<dt class="col-sm-6">Stok</dt>
-						<dd class="col-sm-6">{{ $stuff->stock }}</dd>
-						<dt class="col-sm-6">Tanggal Masuk</dt>
-						<dd class="col-sm-6">{{ localDate($stuff->created_at) }}</dd>
+						<dt class="col-sm-4">No ISBN</dt>
+						<dd class="col-sm-8">{{ $stuff->noisbn }}</dd>
+						<dt class="col-sm-4">Barcode</dt>
+						<dd class="col-sm-8">{{ $stuff->barcode }}</dd>
+						<dt class="col-sm-4">Kategori</dt>
+						<dd class="col-sm-8">{{ $stuff->category->nama_kategori ?? '-' }}</dd>
+						<dt class="col-sm-4">Judul</dt>
+						<dd class="col-sm-8">{{ $stuff->judul }}</dd>
+						<dt class="col-sm-4">Rak</dt>
+						<dd class="col-sm-8">{{ $stuff->rack->nama_rak ?? '-' }}</dd>
+						<dt class="col-sm-4">Penulis</dt>
+						<dd class="col-sm-8">{{ $stuff->penulis }}</dd>
+						<dt class="col-sm-4">Penerbit</dt>
+						<dd class="col-sm-8">{{ $stuff->penerbit }}</dd>
+						<dt class="col-sm-4">Tahun</dt>
+						<dd class="col-sm-8">{{ $stuff->tahun }}</dd>
+						<dt class="col-sm-4">Stok</dt>
+						<dd class="col-sm-8">{{ $stuff->stock }}</dd>
+						<dt class="col-sm-4">Harga Pokok</dt>
+						<dd class="col-sm-8">{{ $stuff->hargaPokok }}</dd>
+						<dt class="col-sm-4">HargaJual</dt>
+						<dd class="col-sm-8">{{ $stuff->hargaJual }}</dd>
+						<dt class="col-sm-4">Disc</dt>
+						<dd class="col-sm-8">{{ $stuff->disc }}</dd>
 					</dl>
 				</div>
 				<div class="card-footer">

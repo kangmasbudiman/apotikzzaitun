@@ -24,8 +24,7 @@ class UpdateCategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'id' => 'required',
-            'name' => 'required|string|unique:categories,name,'.$this->id
+            'nama_kategori' => 'required|string|unique:kategori,nama_kategori,'.$this->category.',idKategori'
         ];
     }
 }
