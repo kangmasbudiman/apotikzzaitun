@@ -1,0 +1,49 @@
+name: apotikdear_mobile
+description: "Aplikasi kasir mobile untuk Apotikdear POS."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # HTTP
+  http: ^1.2.2
+
+  # path join untuk sqflite database location
+  path: ^1.9.0
+
+  #-state management sederhana, ringan untuk kasir
+  provider: ^6.1.2
+
+  # Menyimpan token login (WAJIB secure, bukan shared_preferences)
+  flutter_secure_storage: ^9.2.2
+
+  # Format rupiah & tanggal Indonesia
+  intl: ^0.19.0
+
+  # Scan barcode untuk layar kasir
+  mobile_scanner: ^5.2.3
+
+  # Cetak struk ke printer thermal Bluetooth (ESC/POS)
+  esc_pos_utils: ^1.0.7
+  flutter_bluetooth_serial_plus: ^0.5.4
+  sqflite: ^2.4.4+1
+  connectivity_plus: ^7.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  sqflite_common_ffi: ^2.3.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
