@@ -33,6 +33,7 @@ class UpdateSettingRequest extends FormRequest
     public function rules()
     {
         return [
+            'nama_sistem' => 'nullable|string|max:100',
             'nama_toko' => 'required|string',
             'alamat_toko' => 'required|string',
             'ppn' => 'required|numeric|between:0,99',

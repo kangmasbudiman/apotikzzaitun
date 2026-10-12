@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
 <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 
 <livewire:styles />
 

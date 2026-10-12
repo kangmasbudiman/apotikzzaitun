@@ -19,7 +19,7 @@
                 <button class="btn btn-sm btn-warning" data-toggle="collapse" data-target="#filter">Filter</button>
                 <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#import">Import Excel</button>
                 <a class="btn btn-success btn-sm" href="{{ route('finance.export') }}">Export Excel</a>
-                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create">Tambah Data</button>
+                <button class="btn btn-add btn-sm" data-toggle="modal" data-target="#create">Tambah Data</button>
             </div>
         </div>
         <div class="card-body border-bottom collapse form-row pb-4" id="filter">

@@ -23,6 +23,16 @@
 				</div>
 				<div class="card-body">
 					<div class="form-group">
+						<label>Nama Sistem</label>
+						<input type="text" class="form-control @error('nama_sistem') is-invalid @enderror" name="nama_sistem" placeholder="Nama Sistem" value="{{ site('nama_sistem') }}">
+
+						<small class="form-text text-muted">Ditampilkan di halaman login. Kosongkan untuk memakai nama toko.</small>
+
+						@error('nama_sistem')
+							<span class="invalid-feedback">{{ $message }}</span>
+						@enderror
+					</div>
+					<div class="form-group">
 						<label>Nama</label>
 						<input type="text" class="form-control @error('nama_toko') is-invalid @enderror" name="nama_toko" placeholder="Nama" value="{{ site('nama_toko') }}" autofocus>
 

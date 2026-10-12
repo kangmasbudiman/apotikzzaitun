@@ -20,7 +20,7 @@
 					<button class="btn btn-success btn-sm" data-toggle="modal" data-target="#import">Import Excel</button>
 					<a class="btn btn-warning btn-sm" href="{{ route('distributor.export') }}">Export Excel</a>
 				@endcan
-				<a href="{{ route('distributor.create') }}" class="btn btn-primary btn-sm">Tambah Data</a>
+				<a href="{{ route('distributor.create') }}" class="btn btn-add btn-sm">Tambah Data</a>
 			</div>
 		</div>
 		<div class="card-body">

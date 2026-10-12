@@ -14,5 +14,5 @@ class Site extends Model
 
     protected $table = 'pengaturan';
 
-    protected $fillable = ['idUser', 'nama_toko', 'alamat_toko', 'telepon_toko', 'ppn', 'logo', 'pakaiLogo', 'min_stok'];
+    protected $fillable = ['idUser', 'nama_sistem', 'nama_toko', 'alamat_toko', 'telepon_toko', 'ppn', 'logo', 'pakaiLogo', 'min_stok'];
 }

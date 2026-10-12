@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="{{ asset('sufee-admin/assets/css/style.css') }}">
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 
 </head>
 
@@ -34,8 +36,8 @@
                         <div class="form-group">
                         <div class="login-logo">
                     <a href="{{ route('login') }}">
-                        <h1 class="text-white font-weight-bold">{{ Site('nama_toko') }}</h1>
-                       
+                        <h1 class="text-white font-weight-bold">{{ site('nama_sistem') ?: site('nama_toko') }}</h1>
+
                     </a>
                 </div>
                 

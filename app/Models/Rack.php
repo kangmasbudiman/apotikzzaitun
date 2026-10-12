@@ -14,4 +14,9 @@ class Rack extends Model
 
     protected $table = 'rak';
     protected $fillable = ['nama_rak'];
+
+    public function stuffs()
+    {
+        return $this->hasMany(Stuff::class, 'idRak', 'idRak');
+    }
 }

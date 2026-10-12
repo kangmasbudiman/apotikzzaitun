@@ -59,5 +59,16 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+
+        // Login dibatasi ketat untuk menahan brute force dari perangkat mobile.
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::perMinute(8)->by($request->ip());
+        });
+
+        // Endpoint transaksi (kasir) lebih longgar supaya tetap lancar saat
+        // antrean panjang, tapi tetap ada batasnya.
+        RateLimiter::for('kasir', function (Request $request) {
+            return Limit::perMinute(120)->by(optional($request->user())->id ?: $request->ip());
+        });
     }
 }

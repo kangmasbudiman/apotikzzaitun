@@ -25,7 +25,7 @@
 	                	<button class="btn btn-success btn-sm" data-toggle="modal" data-target="#import">Import Excel</button>
 		                <a class="btn btn-success btn-sm" href="{{ route('stuff.export') }}">Export Excel</a>
 	                @endcan
-					<a href="{{ route('stuff.create') }}" class="btn btn-primary btn-sm">Tambah Data</a>
+					<a href="{{ route('stuff.create') }}" class="btn btn-add btn-sm">Tambah Data</a>
 				</div>
 			@endcan
 		</div>

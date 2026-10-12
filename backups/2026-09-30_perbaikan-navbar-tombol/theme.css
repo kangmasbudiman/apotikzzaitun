@@ -1,0 +1,362 @@
+/* ============================================================
+   TEMA: Hijau Farmasi Alami — Apotikdear POS
+   Override di atas template Sufee Admin (dimuat terakhir).
+   ============================================================ */
+
+:root {
+    --hfa-primary: #16a34a;
+    --hfa-primary-dark: #15803d;
+    --hfa-primary-deep: #0d3b2e;
+    --hfa-forest: #14532d;
+    --hfa-leaf: #22c55e;
+    --hfa-bg: #f2f7f3;
+    --hfa-text: #1f2d24;
+    --hfa-muted: #6b7f72;
+    --hfa-line: #dcebe1;
+    --hfa-radius: 14px;
+    --hfa-shadow: 0 2px 12px rgba(13, 59, 46, 0.08);
+    --hfa-shadow-lg: 0 10px 30px rgba(13, 59, 46, 0.14);
+}
+
+/* ---------- Dasar ---------- */
+body {
+    font-family: 'Nunito', 'Open Sans', sans-serif;
+    background: var(--hfa-bg);
+    color: var(--hfa-text);
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #e6efe9; }
+::-webkit-scrollbar-thumb { background: #b7cebe; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #9cbfa9; }
+
+/* ---------- Sidebar ---------- */
+aside.left-panel,
+.left-panel .navbar {
+    background: linear-gradient(180deg, #0d3b2e 0%, #124a38 55%, #14532d 100%);
+}
+
+.left-panel .navbar .navbar-brand {
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    padding: 18px 0 14px;
+}
+
+.left-panel .navbar .navbar-nav li a {
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.18s ease;
+}
+
+.left-panel .navbar .navbar-nav li a:hover,
+.left-panel .navbar .navbar-nav li a:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.left-panel .navbar .navbar-nav li a .menu-icon {
+    color: #86efac;
+}
+
+.left-panel .navbar .navbar-nav li.active > a,
+.left-panel .navbar .navbar-nav li.active > a:hover {
+    background: linear-gradient(90deg, var(--hfa-primary), #1db954);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+}
+
+.left-panel .navbar .navbar-nav li.active > a .menu-icon {
+    color: #ffffff;
+}
+
+.left-panel .navbar .navbar-nav li.menu-item-has-children .dropdown-menu,
+.left-panel .navbar .navbar-nav .sub-menu.children.dropdown-menu {
+    background: rgba(0, 0, 0, 0.22);
+    border: none;
+    border-radius: 10px;
+}
+
+.left-panel .navbar .navbar-nav .sub-menu li a {
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 500;
+}
+
+.left-panel .navbar .navbar-nav .sub-menu li a:hover {
+    color: #bbf7d0;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+/* ---------- Header / Topbar ---------- */
+.right-panel header.header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--hfa-line);
+    box-shadow: 0 2px 10px rgba(13, 59, 46, 0.06);
+}
+
+.menutoggle {
+    color: var(--hfa-primary-dark);
+    border-radius: 10px;
+}
+
+.menutoggle:hover {
+    background: #e7f6ec;
+    color: var(--hfa-primary-deep);
+}
+
+.header-menu .for-notification .btn {
+    border-radius: 10px;
+}
+
+.user-area .dropdown-toggle {
+    color: var(--hfa-primary-deep);
+    border-radius: 10px;
+}
+
+.user-area .dropdown-toggle:hover {
+    background: #e7f6ec;
+}
+
+.user-area .user-menu {
+    border-radius: 12px;
+    border: 1px solid var(--hfa-line);
+    box-shadow: var(--hfa-shadow-lg);
+    padding: 8px;
+}
+
+.user-area .user-menu span {
+    color: var(--hfa-forest);
+    font-weight: 700;
+}
+
+.user-area .user-menu .nav-link {
+    border-radius: 8px;
+    color: var(--hfa-text);
+}
+
+.user-area .user-menu .nav-link:hover {
+    background: #e7f6ec;
+    color: var(--hfa-primary-dark);
+}
+
+/* ---------- Judul Halaman ---------- */
+.right-panel .breadcrumbs {
+    background: transparent;
+}
+
+.breadcrumbs .page-title h1 {
+    color: var(--hfa-forest);
+    font-weight: 800;
+}
+
+/* ---------- Kartu / Card ---------- */
+.card {
+    border: none;
+    border-radius: var(--hfa-radius);
+    box-shadow: var(--hfa-shadow);
+}
+
+.card .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--hfa-line);
+    color: var(--hfa-forest);
+    font-weight: 700;
+    border-radius: var(--hfa-radius) var(--hfa-radius) 0 0 !important;
+}
+
+.card .card-footer {
+    background: transparent;
+    border-top: 1px solid var(--hfa-line);
+}
+
+/* komponen box-data dashboard */
+.x_content, .card-body { color: var(--hfa-text); }
+
+/* ---------- Tombol ---------- */
+.btn {
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.btn-primary,
+.btnlogin {
+    background: linear-gradient(135deg, var(--hfa-primary), var(--hfa-primary-dark));
+    border: none;
+    color: #ffffff;
+    box-shadow: 0 3px 10px rgba(22, 163, 74, 0.3);
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btnlogin:hover, .btnlogin:focus {
+    background: linear-gradient(135deg, #15803d, #166534);
+    color: #ffffff;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: none;
+}
+
+.btn-secondary {
+    background: #e9f2ec;
+    border: none;
+    color: #3f5a49;
+}
+
+.btn-secondary:hover {
+    background: #d8e8de;
+    color: var(--hfa-forest);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+}
+
+/* ---------- Form ---------- */
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #cfdfd4;
+    color: var(--hfa-text);
+}
+
+.form-control:focus {
+    border-color: var(--hfa-primary);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+label { font-weight: 600; color: #41564a; }
+
+/* ---------- Tabel ---------- */
+.table thead th {
+    background: #e8f3ec;
+    color: var(--hfa-forest);
+    border-bottom: 2px solid #d3e7da;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.4px;
+}
+
+.table td, .table th {
+    border-color: var(--hfa-line);
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background: #f0f9f3;
+}
+
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:before { color: #6fae85; }
+
+/* ---------- Modal ---------- */
+.modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--hfa-shadow-lg);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #e9f7ee, #d7efdf);
+    border-bottom: 1px solid var(--hfa-line);
+    border-radius: 16px 16px 0 0 !important;
+}
+
+.modal-title { color: var(--hfa-forest); font-weight: 800; }
+
+.modal-footer {
+    border-top: 1px solid var(--hfa-line);
+    background: #fbfdfc;
+    border-radius: 0 0 16px 16px;
+}
+
+/* ---------- Badge & Alert ---------- */
+.badge-success { background: #16a34a; }
+.badge-danger { background: #dc2626; }
+
+.alert {
+    border-radius: 12px;
+    border: none;
+}
+
+.alert-success { background: #dcfce7; color: #14532d; }
+.alert-danger { background: #fee2e2; color: #7f1d1d; }
+.alert-warning { background: #fef9c3; color: #713f12; }
+
+/* ---------- Dropdown umum ---------- */
+.dropdown-menu {
+    border-radius: 12px;
+    border: 1px solid var(--hfa-line);
+    box-shadow: var(--hfa-shadow-lg);
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background: #e7f6ec;
+    color: var(--hfa-primary-dark);
+}
+
+/* ---------- Paginasi ---------- */
+.pagination .page-link {
+    border-color: var(--hfa-line);
+    color: var(--hfa-primary-dark);
+    border-radius: 8px !important;
+    margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--hfa-primary);
+    border-color: var(--hfa-primary);
+}
+
+/* ============================================================
+   HALAMAN LOGIN
+   ============================================================ */
+body.bg-white,
+.sufee-login {
+    background:
+        radial-gradient(circle at 12% 22%, rgba(134, 239, 172, 0.16) 0, transparent 34%),
+        radial-gradient(circle at 88% 78%, rgba(74, 222, 128, 0.14) 0, transparent 36%),
+        linear-gradient(140deg, #0d3b2e 0%, #14532d 48%, #166534 100%) !important;
+    min-height: 100vh;
+}
+
+.login-content { margin: 7vh auto; }
+
+.login-form {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 48px 44px;
+    box-shadow: 0 24px 60px rgba(5, 34, 24, 0.45);
+}
+
+.login-form .login-logo h1,
+.login-form .login-logo span,
+.login-form label {
+    color: var(--hfa-forest);
+}
+
+.login-form .login-logo h1 {
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    font-size: 1.6rem;
+}
+
+.login-form .form-control {
+    padding: 0.65rem 0.9rem;
+    background: #f4faf6;
+}
+
+.login-form .checkbox label {
+    color: var(--hfa-muted);
+    text-transform: none;
+    font-weight: 500;
+}
+
+.login-form .btnlogin {
+    padding: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}

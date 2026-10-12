@@ -16,7 +16,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="h6 font-weight-bold mb-0 card-title">Data Kategori Pengeluaran</h2>
             <div>
-                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create">Tambah Data</button>
+                <button class="btn btn-add btn-sm" data-toggle="modal" data-target="#create">Tambah Data</button>
             </div>
         </div>
         <div class="card-body">

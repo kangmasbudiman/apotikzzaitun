@@ -15,21 +15,6 @@
 			</div>
 			
 			<div class="form-group">
-				<label>Nama Pasien</label>
-				<div class="input-group">
-					<input type="text" name="namapasien" wire:model="namapasien" class="form-control" >
-				</div>
-			</div>
-			
-			<div class="form-group">
-				<label>Tanggal Lahir</label>
-				<div class="input-group">
-					<input type="text" name="tgl_lahir" wire:model="tgl_lahir" class="form-control" >
-				</div>
-			</div>
-			
-			
-			<div class="form-group">
 				<label>Subtotal</label>
 				<div class="input-group">
 					<input type="text" id="txt1" class="form-control" value="Rp {{ number_format($subtotal) }}" disabled>

@@ -31,6 +31,7 @@ class Payment extends Component
 	{
 		$this->money = 0;
 		$this->return = 0;
+		$this->diskon = 0;
 		$this->grandtotal = max(intval(str_replace([',', '.'], '', $this->subtotal)) , 0);
 
 		$this->resetValidation();
@@ -39,11 +40,12 @@ class Payment extends Component
 
 	public function store(TransactionService $transactionService)
 	{
-		$this->money = intval(str_replace([',', '.'], '', $this->money));
+		$this->money = intval(str_replace([',', '.'], '', $this->money ?: 0));
+		$this->diskon = intval(str_replace([',', '.'], '', $this->diskon ?: 0));
 
 		$this->validate([
 			'money' => 'required|integer|min:'.$this->subtotal,
-			
+
 		]);
 
 		$data = [
@@ -92,7 +94,8 @@ class Payment extends Component
 
 		
 	
-			$this->grandtotal = max(intval(str_replace([',', '.'], '', $this->subtotal)) -$diskon , 0);
+		$diskon = intval(str_replace([',', '.'], '', $diskon ?: 0));
+			$this->grandtotal = max(intval(str_replace([',', '.'], '', $this->subtotal)) - $diskon , 0);
 		
 		
 	
