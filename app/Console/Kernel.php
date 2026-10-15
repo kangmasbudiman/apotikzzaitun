@@ -13,7 +13,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        // Daftar eksplisit. `load()` di bawah saja kadang tidak cukup di
+        // Laravel 8 kalau autoloader sudah di-cache sebagai classmap.
+        \App\Console\Commands\DiagnosaLoginCommand::class,
     ];
 
     /**
