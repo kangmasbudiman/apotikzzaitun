@@ -37,6 +37,10 @@ class UpdateStuffRequest extends FormRequest
     {
         return [
             'hargaJual.gte' => 'Harga jual harus lebih besar atau sama dengan harga pokok.',
+            // Pesan ini HANYA muncul kalau barcode benar-benar dipakai obat lain —
+            // barcode yang tidak berubah saat mengedit diabaikan lewat Rule::ignore.
+            'barcode.unique' => 'Barcode sudah dipakai obat lain. Ganti barcode atau periksa kembali.',
+            'barcode.required' => 'Barcode wajib diisi.',
         ];
     }
 }

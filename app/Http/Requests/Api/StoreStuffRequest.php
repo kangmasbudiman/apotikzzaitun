@@ -39,6 +39,8 @@ class StoreStuffRequest extends FormRequest
     {
         return [
             'hargaJual.gte' => 'Harga jual harus lebih besar atau sama dengan harga pokok.',
+            'barcode.unique' => 'Barcode sudah dipakai obat lain. Ganti barcode atau periksa kembali.',
+            'barcode.required' => 'Barcode wajib diisi.',
         ];
     }
 }
