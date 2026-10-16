@@ -53,7 +53,10 @@ class StuffController extends Controller
             ->when(!$request->filled('sort'), fn ($q) => $q->orderBy('obat', 'asc'))
             ->paginate($perPage);
 
-        return response()->json(StuffResource::collection($stuffs));
+        // ->response() menjaga blok `meta` paginator (total, current_page,
+        // last_page). response()->json() melepasnya, sehingga aplikasi mobile
+        // tidak pernah tahu ada berapa obat selain yang sedang dimuat.
+        return StuffResource::collection($stuffs)->response();
     }
 
     /**
