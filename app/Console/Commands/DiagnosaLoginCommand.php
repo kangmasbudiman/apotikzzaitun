@@ -63,8 +63,11 @@ class DiagnosaLoginCommand extends Command
 
         // ------------------------------------------ 2. personal_access_tokens
         //
-        // Ini penyebab paling mungkin. Tabel ini wajib ada karena login
-        // menyimpan token Sanctum; tanpa itu createToken() meledak.
+        // Ini penyebab paling mungkin. Tabel ini dibuat 12 Oktober 2025
+        // bersamaan dengan fitur REST API. Kalau server produksi belum pernah
+        // `php artisan migrate` sejak saat itu, `createToken()` meledak tepat
+        // setelah password cocok — gejalanya: password salah -> 422, password
+        // benar -> 500. Persis yang sekarang terjadi.
         if (Schema::hasTable('personal_access_tokens')) {
             $kolom = Schema::getColumnListing('personal_access_tokens');
 
@@ -83,6 +86,27 @@ class DiagnosaLoginCommand extends Command
                 $this->gagal(
                     'Kolom personal_access_tokens kurang',
                     implode(', ', $kurang)
+                );
+                $this->line('');
+                $this->petunjuk('   Jalankan: php artisan migrate --force');
+                $this->petunjuk('   PENTING: `migrate` saja BELUM cukup. Nama migrasi 2019');
+                $this->petunjuk('   sudah tercatat sejak install pertama, jadi Laravel melewatinya');
+                $this->petunjuk('   dan kolom baru tidak akan pernah dibuat. Yang menambal ini');
+                $this->petunjuk('   adalah migrasi 2026_10_16_000000_align_personal_access_tokens_');
+                $this->petunjuk('   with_app_schema.php — pastikan file-nya sudah ikut ter-deploy.');
+            }
+
+            // Kolom ada belum tentutipenya benar. `tokenable_id` INTEGER
+            // adalah jebakan kedua yang tidak terlihat dari daftar kolom:
+            // primary key tabel `user` berupa varchar '000001', sedangkan
+            // Sanctum 2019 membuat kolom ini unsignedBigInteger. INSERT
+            // lalu diam-diam menyimpan 1, sehingga token tidak pernah cocok
+            // dengan user-nya dan semua request berikutnya membalas 401.
+            if (in_array('tokenable_id', $kolom, true) && $this->isIntegerColumn('tokenable_id')) {
+                $adaMasalah = true;
+                $this->gagal(
+                    'Kolom `tokenable_id` bertipe integer',
+                    'harus varchar — primary key user bukan angka'
                 );
                 $this->line('');
                 $this->petunjuk('   Jalankan: php artisan migrate --force');
@@ -213,5 +237,31 @@ class DiagnosaLoginCommand extends Command
     protected function petunjuk(string $pesan)
     {
         $this->line("            $pesan");
+    }
+
+    /**
+     * Apakah kolom ini bertipe integer di MySQL?
+     *
+     * Hanya bermakna untuk MySQL; driver lain dianggap "bukan integer" agar
+     * pemeriksaan ini tidak pernah menjadi false alarm.
+     */
+    protected function isIntegerColumn(string $column): bool
+    {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            return false;
+        }
+
+        $row = DB::selectOne(
+            'SELECT DATA_TYPE FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+            ['personal_access_tokens', $column]
+        );
+
+        return $row && in_array(
+            strtolower((string) $row->DATA_TYPE),
+            ['tinyint', 'smallint', 'mediumint', 'int', 'integer', 'bigint'],
+            true
+        );
     }
 }
