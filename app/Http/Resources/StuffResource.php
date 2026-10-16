@@ -42,6 +42,13 @@ class StuffResource extends JsonResource
             'id_kategori'=> $this->idKategori,
             'id_rak'     => $this->idRak,
 
+            // Path RELATIF (tanpa host): aplikasi menyimpan alamat server
+            // sendiri dan cukup menempelkan path ini. Host dari url() di
+            // container produksi tidak selalu benar.
+            'gambar_url' => ($this->relationLoaded('gambar') && $this->gambar)
+                                ? 'gambar-obat/'.$this->idBuku
+                                : null,
+
             'kategori'   => $this->whenLoaded('category', fn () => [
                 'id'   => $this->category->idKategori,
                 'nama' => $this->category->nama_kategori,

@@ -21,7 +21,7 @@ class StuffController extends Controller
     {
         $perPage = min((int) $request->query('per_page', 25), 100);
 
-        $stuffs = Stuff::with(['category', 'rack'])
+        $stuffs = Stuff::with(['category', 'rack', 'gambar'])
             ->when($request->filled('search'), function ($query) use ($request)
             {
                 $s = $request->query('search');
@@ -64,7 +64,7 @@ class StuffController extends Controller
      */
     public function show(string $id): JsonResponse
     {
-        $stuff = Stuff::with(['category', 'rack'])->findOrFail($id);
+        $stuff = Stuff::with(['category', 'rack', 'gambar'])->findOrFail($id);
 
         return response()->json(['data' => new StuffResource($stuff)]);
     }
@@ -84,7 +84,7 @@ class StuffController extends Controller
             return response()->json(['data' => null, 'exact' => null, 'suggestions' => []]);
         }
 
-        $exact = Stuff::with(['category', 'rack'])
+        $exact = Stuff::with(['category', 'rack', 'gambar'])
             ->where('barcode', $q)
             ->orWhere('idBuku', $q)
             ->first();
@@ -98,7 +98,7 @@ class StuffController extends Controller
         }
 
         // Tidak ketemu persis -> beri saran (cocok sebagian pada nama obat).
-        $suggestions = Stuff::with(['category', 'rack'])
+        $suggestions = Stuff::with(['category', 'rack', 'gambar'])
             ->where('obat', 'like', "%{$q}%")
             ->orderBy('obat')
             ->limit(10)

@@ -40,4 +40,14 @@ class Stuff extends Model
     {
         return $this->belongsTo(Rack::class, 'idRak', 'idRak');
     }
+
+    /**
+     * Foto produk. select('idBuku') penting: eager load hanya perlu tahu
+     * foto ADA atau TIDAK — kolom LONGBLOB tidak boleh ikut terbaca tiap
+     * kali daftar obat dimuat.
+     */
+    public function gambar()
+    {
+        return $this->hasOne(GambarObat::class, 'idBuku', 'idBuku')->select('idBuku');
+    }
 }

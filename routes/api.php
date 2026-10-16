@@ -17,6 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/login', [App\Http\Controllers\Api\AuthController::class, 'login'])
     ->middleware('throttle:login');
 
+// Identitas toko — publik supaya layar LOGIN (sebelum punya token) sudah
+// menampilkan nama yang diatur admin, bukan nama bawaan aplikasi.
+Route::get('site', [App\Http\Controllers\Api\SiteController::class, 'show']);
+
+// Foto produk obat — publik: dimuat widget gambar yang tidak mengirim token.
+Route::get('gambar-obat/{id}', [App\Http\Controllers\Api\GambarObatController::class, 'show']);
+
 // ---------------- Terproteksi token ----------------
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -25,20 +32,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('auth/logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::post('auth/logout-all', [App\Http\Controllers\Api\AuthController::class, 'logoutAll']);
 
-    // Pengaturan toko (nama, PPN, min stok, dll) untuk ditampilkan di app
-    Route::get('site', function () {
-        $site = cache('site') ?: App\Models\Site::first();
-
-        return response()->json([
-            'data' => [
-                'nama_sistem' => $site->nama_sistem ?? null,
-                'nama_toko'   => $site->nama_toko,
-                'alamat_toko' => $site->alamat_toko,
-                'telepon_toko'=> $site->telepon_toko,
-                'ppn'         => (float) $site->ppn,
-                'min_stok'    => (int) $site->min_stok,
-            ],
-        ]);
+    // Ubah identitas toko (nama layar login, dll) — hanya admin.
+    Route::middleware('can:isAdmin')->group(function () {
+        Route::put('site', [App\Http\Controllers\Api\SiteController::class, 'update']);
     });
 
     // ---------- Master data: Kategori & Rak (Admin + Gudang) ----------
@@ -58,6 +54,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('obat', [App\Http\Controllers\Api\StuffController::class, 'store']);
         Route::put('obat/{id}', [App\Http\Controllers\Api\StuffController::class, 'update']);
         Route::delete('obat/{id}', [App\Http\Controllers\Api\StuffController::class, 'destroy']);
+
+        // Foto produk obat
+        Route::post('obat/{id}/gambar', [App\Http\Controllers\Api\GambarObatController::class, 'store']);
+        Route::delete('obat/{id}/gambar', [App\Http\Controllers\Api\GambarObatController::class, 'destroy']);
     });
 
     // ---------- Obat (semua user login boleh baca) ----------
