@@ -42,6 +42,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Logo apotek (upload/ganti & hapus).
         Route::post('site/logo', [App\Http\Controllers\Api\SiteController::class, 'simpanLogo']);
         Route::delete('site/logo', [App\Http\Controllers\Api\SiteController::class, 'hapusLogo']);
+
+        // Laporan penjualan periode bebas (keuangan toko = admin).
+        Route::get('laporan', [App\Http\Controllers\Api\LaporanController::class, 'index']);
     });
 
     // ---------- Master data: Kategori & Rak (Admin + Gudang) ----------
@@ -92,5 +95,10 @@ Route::middleware('can:isAdminKasir')->group(function () {
             ->middleware('throttle:kasir');
         Route::get('transaksi/{id}', [App\Http\Controllers\Api\TransactionController::class, 'show']);
         Route::patch('transaksi/{id}/batal', [App\Http\Controllers\Api\TransactionController::class, 'cancel']);
+
+        // Bon pelanggan (piutang) — dicatat lewat POST /transaksi, ini
+        // daftar & pelunasannya.
+        Route::get('piutang', [App\Http\Controllers\Api\PiutangController::class, 'index']);
+        Route::post('piutang/{id}/lunas', [App\Http\Controllers\Api\PiutangController::class, 'lunas']);
     });
 });

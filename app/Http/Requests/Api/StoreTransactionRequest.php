@@ -24,6 +24,11 @@ class StoreTransactionRequest extends FormRequest
             'diskon'            => 'nullable|integer|min:0',
             'total_bayar'       => 'required|integer|min:0',
 
+            // Bon (piutang): barang dibawa pulang, uang menyusul.
+            'bon'               => 'nullable|boolean',
+            'nama_pelanggan'    => 'required_with:bon|string|max:100',
+            'telepon_pelanggan' => 'nullable|string|max:25',
+
             'catatan'           => 'nullable|string|max:200',
         ];
     }
@@ -36,6 +41,8 @@ class StoreTransactionRequest extends FormRequest
             'items.*.jumlah'       => 'jumlah',
             'total_bayar'          => 'uang pembayaran',
             'diskon'               => 'diskon',
+            'nama_pelanggan'       => 'nama pelanggan',
+            'telepon_pelanggan'    => 'telepon pelanggan',
         ];
     }
 }

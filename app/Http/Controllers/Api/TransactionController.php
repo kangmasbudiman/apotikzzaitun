@@ -127,10 +127,14 @@ class TransactionController extends Controller
 
         $diskon     = (int) ($request->diskon ?? 0);
         $totalBayar = max($subtotal - $diskon, 0);
-        $totalMasuk = (int) $request->total_bayar;
-        $kembalian  = max($totalMasuk - $totalBayar, 0);
 
-        if ($totalMasuk < $totalBayar) {
+        // Bon (piutang): uang belum diterima, jadi tidak ada cek
+        // "uang kurang" dan tidak ada kembalian.
+        $bon        = $request->boolean('bon');
+        $totalMasuk = $bon ? 0 : (int) $request->total_bayar;
+        $kembalian  = $bon ? 0 : max($totalMasuk - $totalBayar, 0);
+
+        if (! $bon && $totalMasuk < $totalBayar) {
             return response()->json([
                 'message' => 'Uang pembayaran kurang dari total belanja.',
                 'errors'  => ['total_bayar' => 'Uang pembayaran kurang dari total belanja.'],
@@ -140,7 +144,7 @@ class TransactionController extends Controller
 
         // ---- Simpan dalam satu transaksi DB ----
         try {
-            $saved = DB::transaction(function () use ($user, $subtotal, $diskon, $totalBayar, $kembalian, $rincian) {
+            $saved = DB::transaction(function () use ($user, $request, $bon, $subtotal, $diskon, $totalBayar, $kembalian, $rincian) {
 
                 $transaction = Transaction::create([
                     'idPenjualan' => $this->generateId(),
@@ -159,6 +163,21 @@ class TransactionController extends Controller
 
                 // Insert ke detail_penjualan -> trigger MySQL mengurangi stok buku.
                 $transaction->stuffs()->attach($rincian);
+
+                // Bon pelanggan dicatat SEKALIGUS dengan transaksinya —
+                // kalau salah satu gagal, keduanya batal (atomic).
+                if ($bon) {
+                    \App\Models\Piutang::create([
+                        'idPenjualan'   => $transaction->idPenjualan,
+                        'idUser'        => $user->idUser,
+                        'nama_user'     => $user->nama,
+                        'nama_pelanggan' => (string) $request->nama_pelanggan,
+                        'telepon'       => $request->telepon_pelanggan,
+                        'nominal'       => $totalBayar,
+                        'status'        => 1,
+                        'tanggal'       => now(),
+                    ]);
+                }
 
                 // Setelah itu, potong dari batch yang paling cepat
                 // kedaluwarsanya (FEFO). Harus di dalam transaksi DB yang

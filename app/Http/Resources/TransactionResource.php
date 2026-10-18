@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Piutang;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
@@ -35,6 +36,14 @@ class TransactionResource extends JsonResource
             'diskon'        => (int) $this->diskon,
             'grandtotal'    => (int) $this->grandtotal,
             'kembalian'     => isset($this->kembalian) ? (int) $this->kembalian : null,
+
+            // Bon yang masih menggantung (kalau ada). Struk memakai ini
+            // untuk menampilkan penanda "BON" alih-alih baris Bayar/Kembali
+            // yang menyesatkan (uang belum diterima).
+            'bon'           => Piutang::query()
+                                ->where('idPenjualan', $this->idPenjualan)
+                                ->where('status', 1)
+                                ->exists(),
 
             'jumlah_item'   => $this->whenLoaded('detail', fn () => $this->detail->sum('jumlah')),
 
