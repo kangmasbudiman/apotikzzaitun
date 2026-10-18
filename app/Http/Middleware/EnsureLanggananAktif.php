@@ -21,11 +21,21 @@ class EnsureLanggananAktif
 
     public function handle(Request $request, Closure $next)
     {
-        if (! $this->langganan->bolehTransaksi()) {
+        $status = $this->langganan->status();
+
+        if ($status['status'] === LanggananService::BELUM) {
+            return response()->json([
+                'message' => 'Belum ada langganan aktif. Pilih paket di '
+                    .'menu Langganan untuk membuka transaksi.',
+                'langganan' => $status,
+            ], 402);
+        }
+
+        if ($status['status'] === LanggananService::KEDALUWARSA) {
             return response()->json([
                 'message' => 'Langganan kedaluwarsa — transaksi dikunci. '
                     .'Aktifkan paket di menu Langganan atau hubungi pemilik aplikasi.',
-                'langganan' => $this->langganan->status(),
+                'langganan' => $status,
             ], 402);
         }
 
