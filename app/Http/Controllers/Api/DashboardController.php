@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\FinanceService;
+use App\Services\RingkasanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
  */
 class DashboardController extends Controller
 {
-    public function __construct(protected FinanceService $finance) {}
+    public function __construct(protected RingkasanService $ringkasan) {}
 
     /**
      * GET /api/dashboard?tanggal=YYYY-MM-DD
@@ -99,57 +99,7 @@ class DashboardController extends Controller
      */
     protected function ringkasan($dari, $sampai, ?string $kasirId): array
     {
-        $pajak = DB::table('penjualan')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->where('status', 1)
-            ->when($kasirId, fn ($q) => $q->where('idUser', $kasirId));
-
-        $omzet = (clone $pajak)->sum('total');
-        $trx = (clone $pajak)->count();
-
-        $batal = DB::table('penjualan')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->where('status', 0)
-            ->when($kasirId, fn ($q) => $q->where('idUser', $kasirId))
-            ->count();
-
-        // Laba kotor = (harga jual - diskon) - harga pokok, dari baris detail.
-        // Pakai SUM per baris supaya akurat walau satu obat terjual >1 batch.
-        $laba = DB::table('detail_penjualan as d')
-            ->join('penjualan as p', 'd.idPenjualan', '=', 'p.idPenjualan')
-            ->whereBetween('p.tanggal', [$dari, $sampai])
-            ->where('p.status', 1)
-            ->when($kasirId, fn ($q) => $q->where('p.idUser', $kasirId))
-            ->selectRaw('
-                COALESCE(SUM(d.hargaJual * d.jumlah), 0) - COALESCE(SUM(d.disc), 0) AS pemasukan,
-                COALESCE(SUM(d.hargaPokok * d.jumlah), 0) AS modal,
-                COALESCE(SUM(d.jumlah), 0) AS qty
-            ')
-            ->first();
-
-        $pemasukan = (int) ($laba->pemasukan ?? 0);
-        $modal = (int) ($laba->modal ?? 0);
-
-        // Pengeluaran operasional pada tanggal yang sama.
-        $operasional = DB::table('pengeluaran')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->sum('pengeluaran');
-
-        $labaKotor = $pemasukan - $modal;
-        $labaBersih = $labaKotor - $operasional;
-
-        return [
-            // SUM() di MariaDB/MySQL mengembalikan string, jadi harus
-            // di-casting agar tipe JSON-nya number (bukan "134300").
-            'omzet'           => (int) $omzet,
-            'transaksi'       => (int) $trx,
-            'transaksi_batal' => (int) $batal,
-            'item_terjual'    => (int) ($laba->qty ?? 0),
-            'laba_kotor'      => $labaKotor,
-            'pengeluaran'     => (int) $operasional,
-            'laba_bersih'     => $labaBersih,
-            'rata_per_transaksi' => $trx > 0 ? (int) round($omzet / $trx) : 0,
-        ];
+        return $this->ringkasan->ringkasan($dari, $sampai, $kasirId);
     }
 
     /**
@@ -211,27 +161,7 @@ class DashboardController extends Controller
      */
     protected function topObat($dari, $sampai): array
     {
-        return DB::table('detail_penjualan as d')
-            ->join('penjualan as p', 'd.idPenjualan', '=', 'p.idPenjualan')
-            ->whereBetween('p.tanggal', [$dari, $sampai])
-            ->where('p.status', 1)
-            ->selectRaw('
-                d.idBuku,
-                d.obat,
-                SUM(d.jumlah) AS qty,
-                SUM(d.hargaJual * d.jumlah - d.disc) AS omzet
-            ')
-            ->groupBy('d.idBuku', 'd.obat')
-            ->orderByDesc('qty')
-            ->limit(10)
-            ->get()
-            ->map(fn ($r) => [
-                'id_buku' => $r->idBuku,
-                'obat'   => $r->obat,
-                'qty'    => (int) $r->qty,
-                'omzet'  => (int) $r->omzet,
-            ])
-            ->all();
+        return $this->ringkasan->topObat($dari, $sampai);
     }
 
     /**
@@ -239,21 +169,7 @@ class DashboardController extends Controller
      */
     protected function stokKritis(): array
     {
-        $min = (int) (\App\Models\Site::first()->min_stok ?? 0);
-
-        return DB::table('buku')
-            ->where('stock', '<=', $min)
-            ->orderBy('stock', 'asc')
-            ->limit(20)
-            ->get(['idBuku', 'obat', 'stock', 'barcode'])
-            ->map(fn ($r) => [
-                'id'         => $r->idBuku,
-                'obat'       => $r->obat,
-                'stock'      => (int) $r->stock,
-                'barcode'    => $r->barcode,
-                'stok_status'=> $r->stock <= 0 ? 'habis' : 'menipis',
-            ])
-            ->all();
+        return $this->ringkasan->stokKritis();
     }
 
     /**

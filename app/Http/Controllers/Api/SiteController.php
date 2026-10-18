@@ -39,7 +39,17 @@ class SiteController extends Controller
             'telepon_toko'=> 'nullable|string|max:50',
             'ppn'         => 'nullable|numeric|min:0',
             'min_stok'    => 'nullable|integer|min:0',
+            'wa_pemilik'  => 'nullable|string|max:20',
+            'laporan_wa_aktif' => 'nullable|boolean',
+            'wa_token'    => 'nullable|string|max:255',
         ]);
+
+        // Token gateway WA hanya ditimpa bila admin mengetik nilai baru.
+        // Aplikasi sengaja tidak mengirim field ini saat dibiarkan kosong,
+        // tapi nilai kosong dari klien lain pun tidak boleh menghapus token.
+        if (array_key_exists('wa_token', $data) && ! filled($data['wa_token'])) {
+            unset($data['wa_token']);
+        }
 
         $site = Site::first();
 
@@ -133,6 +143,13 @@ class SiteController extends Controller
             'ppn'         => (float) ($site->ppn ?? 0),
             'min_stok'    => (int) ($site->min_stok ?? 0),
             'logo_url'    => LogoToko::exists() ? 'site/logo' : null,
+
+            // Laporan WA harian. Nilai token TIDAK PERNAH ikut keluar —
+            // payload ini juga dipakai GET /site yang publik (layar login);
+            // aplikasi cukup tahu apakah token sudah tersimpan.
+            'wa_pemilik'         => $site->wa_pemilik ?? null,
+            'laporan_wa_aktif'   => (bool) ($site->laporan_wa_aktif ?? false),
+            'wa_token_tersimpan' => ! empty($site->wa_token),
         ];
     }
 }

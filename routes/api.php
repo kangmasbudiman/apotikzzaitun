@@ -46,6 +46,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('langganan/aktivasi', [App\Http\Controllers\Api\LanggananController::class, 'aktivasi']);
     });
 
+    // ---------- Laporan WA harian ----------
+    // Dipanggil aplikasi diam-diam sekali per sesi oleh user mana pun yang
+    // membuka app duluan; server menahan idempotensi & syarat pengiriman,
+    // jadi aman dipanggil berulang dan balasannya bebas angka sensitif.
+    Route::post('laporan-wa/kirim', [App\Http\Controllers\Api\LaporanWaController::class, 'kirim'])
+        ->middleware('throttle:laporan-wa');
+
     // Ubah identitas toko (nama layar login, dll) — hanya admin.
     Route::middleware('can:isAdmin')->group(function () {
         Route::put('site', [App\Http\Controllers\Api\SiteController::class, 'update']);
@@ -53,6 +60,9 @@ Route::middleware('auth:sanctum')->group(function () {
         // Logo apotek (upload/ganti & hapus).
         Route::post('site/logo', [App\Http\Controllers\Api\SiteController::class, 'simpanLogo']);
         Route::delete('site/logo', [App\Http\Controllers\Api\SiteController::class, 'hapusLogo']);
+
+        // Pesan uji laporan WA — verifikasi token & nomor pemilik.
+        Route::post('laporan-wa/uji', [App\Http\Controllers\Api\LaporanWaController::class, 'uji']);
 
         // Laporan penjualan periode bebas (keuangan toko = admin).
         Route::get('laporan', [App\Http\Controllers\Api\LaporanController::class, 'index']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\RingkasanService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\DB;
  */
 class LaporanController extends Controller
 {
+    public function __construct(protected RingkasanService $ringkasan) {}
+
     /**
      * GET /api/laporan?dari=YYYY-MM-DD&sampai=YYYY-MM-DD
      *
@@ -56,48 +59,7 @@ class LaporanController extends Controller
 
     protected function ringkasan($dari, $sampai): array
     {
-        $omzet = (int) DB::table('penjualan')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->where('status', 1)
-            ->sum('total');
-
-        $trx = (int) DB::table('penjualan')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->where('status', 1)
-            ->count();
-
-        $batal = (int) DB::table('penjualan')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->where('status', 0)
-            ->count();
-
-        $laba = DB::table('detail_penjualan as d')
-            ->join('penjualan as p', 'd.idPenjualan', '=', 'p.idPenjualan')
-            ->whereBetween('p.tanggal', [$dari, $sampai])
-            ->where('p.status', 1)
-            ->selectRaw('
-                COALESCE(SUM(d.hargaJual * d.jumlah), 0) - COALESCE(SUM(d.disc), 0) AS pemasukan,
-                COALESCE(SUM(d.hargaPokok * d.jumlah), 0) AS modal,
-                COALESCE(SUM(d.jumlah), 0) AS qty
-            ')
-            ->first();
-
-        $operasional = (int) DB::table('pengeluaran')
-            ->whereBetween('tanggal', [$dari, $sampai])
-            ->sum('pengeluaran');
-
-        $labaKotor = (int) ($laba->pemasukan ?? 0) - (int) ($laba->modal ?? 0);
-
-        return [
-            'omzet'              => $omzet,
-            'transaksi'          => $trx,
-            'transaksi_batal'    => $batal,
-            'item_terjual'       => (int) ($laba->qty ?? 0),
-            'laba_kotor'         => $labaKotor,
-            'pengeluaran'        => $operasional,
-            'laba_bersih'        => $labaKotor - $operasional,
-            'rata_per_transaksi' => $trx > 0 ? (int) round($omzet / $trx) : 0,
-        ];
+        return $this->ringkasan->ringkasan($dari, $sampai);
     }
 
     /**
@@ -132,27 +94,7 @@ class LaporanController extends Controller
 
     protected function topObat($dari, $sampai): array
     {
-        return DB::table('detail_penjualan as d')
-            ->join('penjualan as p', 'd.idPenjualan', '=', 'p.idPenjualan')
-            ->whereBetween('p.tanggal', [$dari, $sampai])
-            ->where('p.status', 1)
-            ->selectRaw('
-                d.idBuku,
-                d.obat,
-                SUM(d.jumlah) AS qty,
-                SUM(d.hargaJual * d.jumlah - d.disc) AS omzet
-            ')
-            ->groupBy('d.idBuku', 'd.obat')
-            ->orderByDesc('qty')
-            ->limit(10)
-            ->get()
-            ->map(fn ($r) => [
-                'id_buku' => $r->idBuku,
-                'obat'    => $r->obat,
-                'qty'     => (int) $r->qty,
-                'omzet'   => (int) $r->omzet,
-            ])
-            ->all();
+        return $this->ringkasan->topObat($dari, $sampai);
     }
 
     /**

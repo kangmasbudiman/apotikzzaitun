@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         // Daftar eksplisit. `load()` di bawah saja kadang tidak cukup di
         // Laravel 8 kalau autoloader sudah di-cache sebagai classmap.
         \App\Console\Commands\DiagnosaLoginCommand::class,
+        \App\Console\Commands\LaporanWaCommand::class,
     ];
 
     /**
@@ -26,7 +27,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Laporan WA kemarin dini hari — hanya berjalan bila host memasang
+        // cron `schedule:run`; tanpa cron, aplikasi tetap memicu laporan
+        // yang sama saat dibuka (idempoten, tidak dobel).
+        $schedule->command('laporan:wa')->dailyAt('01:05');
     }
 
     /**
