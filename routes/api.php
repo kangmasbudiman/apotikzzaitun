@@ -35,6 +35,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('auth/logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::post('auth/logout-all', [App\Http\Controllers\Api\AuthController::class, 'logoutAll']);
 
+    // ---------- Langganan (masa aktif aplikasi) ----------
+    // TIDAK dikunci middleware `langganan` — justru endpoint inilah yang
+    // dipakai aplikasi untuk menampilkan status & mengaktifkan ulang saat
+    // kedaluwarsa. Status + daftar paket boleh semua user login (kasir
+    // perlu melihat banner peringatan); aktivasi hanya admin.
+    Route::get('langganan/status', [App\Http\Controllers\Api\LanggananController::class, 'status']);
+    Route::get('langganan/paket', [App\Http\Controllers\Api\LanggananController::class, 'paket']);
+    Route::middleware('can:isAdmin')->group(function () {
+        Route::post('langganan/aktivasi', [App\Http\Controllers\Api\LanggananController::class, 'aktivasi']);
+    });
+
     // Ubah identitas toko (nama layar login, dll) — hanya admin.
     Route::middleware('can:isAdmin')->group(function () {
         Route::put('site', [App\Http\Controllers\Api\SiteController::class, 'update']);
@@ -79,7 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('obat/{id}', [App\Http\Controllers\Api\StuffController::class, 'show']);
 
     // Ringkasan dashboard
-Route::middleware('can:isAdminKasir')->group(function () {
+    Route::middleware(['can:isAdminKasir', 'langganan'])->group(function () {
         Route::get('dashboard', [App\Http\Controllers\Api\DashboardController::class, 'index']);
     });
 
@@ -88,7 +99,9 @@ Route::middleware('can:isAdminKasir')->group(function () {
     Route::get('batch', [App\Http\Controllers\Api\TransactionController::class, 'cekBatch']);
 
     // ---------- Transaksi / Kasir (Admin + Kasir) ----------
-    Route::middleware('can:isAdminKasir')->group(function () {
+    // Middleware `langganan`: saat masa aktif habis (lewat masa tenggang),
+    // seluruh endpoint di grup ini ditolak 402 — kasir tidak bisa menjual.
+    Route::middleware(['can:isAdminKasir', 'langganan'])->group(function () {
 
         Route::get('transaksi', [App\Http\Controllers\Api\TransactionController::class, 'index']);
         Route::post('transaksi', [App\Http\Controllers\Api\TransactionController::class, 'store'])
