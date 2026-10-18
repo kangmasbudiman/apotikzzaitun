@@ -21,6 +21,9 @@ Route::post('auth/login', [App\Http\Controllers\Api\AuthController::class, 'logi
 // menampilkan nama yang diatur admin, bukan nama bawaan aplikasi.
 Route::get('site', [App\Http\Controllers\Api\SiteController::class, 'show']);
 
+// Logo apotek — publik: dimuat widget gambar di layar login (tanpa token).
+Route::get('site/logo', [App\Http\Controllers\Api\SiteController::class, 'tampilkanLogo']);
+
 // Foto produk obat — publik: dimuat widget gambar yang tidak mengirim token.
 Route::get('gambar-obat/{id}', [App\Http\Controllers\Api\GambarObatController::class, 'show']);
 
@@ -35,6 +38,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Ubah identitas toko (nama layar login, dll) — hanya admin.
     Route::middleware('can:isAdmin')->group(function () {
         Route::put('site', [App\Http\Controllers\Api\SiteController::class, 'update']);
+
+        // Logo apotek (upload/ganti & hapus).
+        Route::post('site/logo', [App\Http\Controllers\Api\SiteController::class, 'simpanLogo']);
+        Route::delete('site/logo', [App\Http\Controllers\Api\SiteController::class, 'hapusLogo']);
     });
 
     // ---------- Master data: Kategori & Rak (Admin + Gudang) ----------

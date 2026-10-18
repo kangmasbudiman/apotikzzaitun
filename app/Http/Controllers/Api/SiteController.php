@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogoToko;
 use App\Models\Site;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 /**
- * Identitas toko/nama sistem.
+ * Identitas toko/nama sistem + logo apotek.
  *
- * GET publik (dipakai layar login sebelum punya token), PUT khusus admin —
- * nama yang diatur admin di sini yang tampil di layar login semua perangkat.
+ * GET publik (dipakai layar login sebelum punya token), PUT/POST/DELETE
+ * khusus admin — nama dan logo yang diatur admin di sini yang tampil di
+ * layar login semua perangkat.
  */
 class SiteController extends Controller
 {
@@ -55,6 +58,68 @@ class SiteController extends Controller
     }
 
     /**
+     * Unggah/ganti logo apotek (admin, multipart field `logo`).
+     *
+     * Logo disimpan sebagai LONGBLOB (satu baris id=1) — bukan file di
+     * storage — supaya bertahan rebuild image Docker di produksi.
+     */
+    public function simpanLogo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'logo' => 'required|file|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        $file = $request->file('logo');
+
+        LogoToko::updateOrCreate(
+            ['id' => 1],
+            [
+                'mime' => $file->getMimeType() ?: 'image/png',
+                'data' => file_get_contents($file->getRealPath()),
+            ]
+        );
+
+        cache()->forget('site');
+
+        return response()->json([
+            'message' => 'Logo toko disimpan.',
+            'data'    => ['logo_url' => 'site/logo'],
+        ]);
+    }
+
+    /**
+     * Hapus logo — aplikasi kembali memakai ikon bawaan.
+     */
+    public function hapusLogo(): JsonResponse
+    {
+        LogoToko::query()->delete();
+
+        cache()->forget('site');
+
+        return response()->json(['message' => 'Logo toko dihapus.']);
+    }
+
+    /**
+     * Kirim bytes logo — publik (tanpa token) karena dimuat widget gambar
+     * di layar login yang belum punya token. Header cache supaya perangkat
+     * kasir tidak mengunduh ulang logo yang sama terus-menerus.
+     */
+    public function tampilkanLogo(): Response
+    {
+        $logo = LogoToko::find(1);
+
+        if (! $logo) {
+            abort(404);
+        }
+
+        return response($logo->data, 200, [
+            'Content-Type'  => $logo->mime,
+            'Cache-Control' => 'public, max-age=3600',
+            'ETag'          => '"'.md5('logo'.$logo->updated_at).'"',
+        ]);
+    }
+
+    /**
      * Bentuk payload yang sama untuk GET & PUT supaya aplikasi bisa langsung
      * memakai respons PUT tanpa memanggil ulang GET site.
      */
@@ -67,6 +132,7 @@ class SiteController extends Controller
             'telepon_toko'=> $site->telepon_toko ?? null,
             'ppn'         => (float) ($site->ppn ?? 0),
             'min_stok'    => (int) ($site->min_stok ?? 0),
+            'logo_url'    => LogoToko::exists() ? 'site/logo' : null,
         ];
     }
 }
