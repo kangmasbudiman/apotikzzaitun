@@ -60,9 +60,16 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
 
-        // Login dibatasi ketat untuk menahan brute force dari perangkat mobile.
+        // Login dibatasi untuk menahan brute force, DUA lapis supaya
+        // perangkat toko (satu koneksi = satu IP) tidak saling mengunci:
+        // per akun+IP ketat 8, per IP longgar 20.
         RateLimiter::for('login', function (Request $request) {
-            return Limit::perMinute(8)->by($request->ip());
+            return [
+                Limit::perMinute(8)->by(
+                    (string) $request->input('username') . '|' . $request->ip()
+                ),
+                Limit::perMinute(20)->by($request->ip()),
+            ];
         });
 
         // Endpoint transaksi (kasir) lebih longgar supaya tetap lancar saat
