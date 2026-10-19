@@ -72,9 +72,10 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         // Pemicu laporan WA harian — dipanggil aplikasi tiap sesi dibuka;
-        // server yang menahan idempotensi, ini hanya penahan spam.
+        // server yang menahan idempotensi, ini hanya penahan spam. Batas
+        // longgar karena saat menguji user kerap buka-tutup app cepat-cepat.
         RateLimiter::for('laporan-wa', function (Request $request) {
-            return Limit::perMinute(5)->by(optional($request->user())->id ?: $request->ip());
+            return Limit::perMinute(30)->by(optional($request->user())->id ?: $request->ip());
         });
     }
 }
