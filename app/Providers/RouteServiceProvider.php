@@ -56,8 +56,12 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting()
     {
+        // Jatah umum semua endpoint /api. Longgar karena tiap deployment
+        // hanya melayani satu toko (sedikit perangkat) dan antrean offline
+        // bisa mengirim burst; endpoint sensitif (login, transaksi) tetap
+        // punya pembatas ketatnya sendiri.
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+            return Limit::perMinute(240)->by(optional($request->user())->id ?: $request->ip());
         });
 
         // Login dibatasi untuk menahan brute force, DUA lapis supaya
